@@ -18,4 +18,5 @@ async def create_author(item: AuthorRequest, db: Session = Depends(create_db_con
     new_item = Author(name=item.name, last_name=item.last_name)
     db.add(new_item)
     db.commit()
+    db.refresh(new_item)
     return new_item

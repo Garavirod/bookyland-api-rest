@@ -21,4 +21,5 @@ async def create_book(item: BookRequest, db: Session = Depends(create_db_connect
                     author_id=item.author_id, genre_id=item.genre_id)
     db.add(new_book)
     db.commit()
+    db.refresh(new_book)
     return new_book

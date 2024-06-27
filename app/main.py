@@ -3,7 +3,6 @@ from fastapi.staticfiles import StaticFiles
 from api import books, genres, authors
 from fastapi.responses import HTMLResponse
 from pathlib import Path
-
 app = FastAPI()
 
 # Serve static content
