@@ -4,6 +4,19 @@ variable "cidr_public_subnet" {}
 variable "cidr_private_subnet" {}
 variable "us_availability_zone" {}
 
+
+output "vpc_bookyland_id" {
+  value = aws_vpc.bookyland_vpc.id
+}
+
+output "public_subnets_id" {
+  value = aws_subnet.bookyland_public_subnets.*.id
+}
+
+output "public_subnets_cidr_block" {
+  value = aws_subnet.bookyland_public_subnets.*.cidr_block
+}
+
 #######
 # VPC #
 #######

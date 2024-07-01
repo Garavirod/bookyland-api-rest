@@ -2,8 +2,6 @@ variable "ec2_security_group_name" {}
 variable "vpc_id" {}
 variable "public_subnet_cicr_blcok" {}
 variable "security_group_name_for_app" {}
-
-
 output "ec2_ssh_http_security_group_id" {
   value = aws_security_group.ec2_ssh_http_security_group.id
 }

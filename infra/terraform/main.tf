@@ -8,6 +8,14 @@ module "networking" {
 }
 
 
+module "security_group" {
+  source = "./security-group"
+  ec2_security_group_name = "SG for SSH and HTTP"
+  vpc_id = module.networking.vpc_bookyland_id
+  public_subnet_cicr_blcok = tolist(module.networking.public_subnets_cidr_block)
+  security_group_name_for_app = "security_group_bookyland_api_rest"
+}
+
 /* module "ec2" {
   source = "./ec2"
   ami_id = var.ami_id
