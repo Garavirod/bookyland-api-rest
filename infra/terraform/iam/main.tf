@@ -1,4 +1,4 @@
-resource "aws_iam_role" "ec2_ecr_pull_role" {
+resource "aws_iam_role" "ecs_task_execution_role" {
   name = "ec2_ecr_pull_role"
 
   assume_role_policy = jsonencode({
@@ -6,46 +6,31 @@ resource "aws_iam_role" "ec2_ecr_pull_role" {
     Statement = [{
       Effect = "Allow",
       Principal = {
-        Service = "ec2.amazonaws.com"
+        Service = "ecs-tasks.amazonaws.com"
       },
       Action = "sts:AssumeRole"
     }]
   })
+
+  managed_policy_arns = [ 
+    "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+   ]
 }
 
-resource "aws_iam_policy" "ec2_ecr_pull_policy" {
-  name        = "ec2_ecr_pull_policy"
-  description = "Policy to allow EC2 instances to pull images from ECR"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage",
-          "ecr:BatchCheckLayerAvailability"
-        ],
-        Resource = "*"
-      },
-      {
-        Effect = "Allow",
-        Action = [
-          "ecr:GetAuthorizationToken"
-        ],
-        Resource = "*"
+resource "aws_iam_role" "ecs_task_role" {
+  name = "ecsTaskRole"
+  assume_role_policy = jsonencode({
+    Version= "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2-task.amazonaws.com"
       }
-    ]
+    }]
   })
-}
 
-resource "aws_iam_role_policy_attachment" "ec2_ecr_pull_policy_attachment" {
-  role       = aws_iam_role.ec2_ecr_pull_role.name
-  policy_arn = aws_iam_policy.ec2_ecr_pull_policy.arn
-}
-
-resource "aws_iam_instance_profile" "ec2_ecr_pull_instance_profile" {
-  name = "ec2_ecr_pull_instance_profile"
-  role = aws_iam_role.ec2_ecr_pull_role.name
+  managed_policy_arns  = [
+    "arn:aws:iam::aws:policy/AmazonRDSFullAccess",
+  ]
 }
