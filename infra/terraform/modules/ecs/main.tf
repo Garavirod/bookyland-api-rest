@@ -1,50 +1,61 @@
 resource "aws_ecs_cluster" "main" {
-  name = var.cluster.name
+  name = var.cluster_name
 }
 
 resource "aws_ecs_task_definition" "main" {
-  family = "fast-api-task"
-  network_mode = "awsvpc"
-  requires_compatibilities = [ "FARGATE" ]
-  cpu = "256"
-  memory = "512"
-  execution_role_arn = var.execution_role_arn
-  task_role_arn = var.task_role_arn
+  family                   = "fast-api-task"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = var.execution_role_arn
+  task_role_arn            = var.task_role_arn
 
   container_definitions = jsonencode([{
-    name = "bookyland-rest-api-app"
-    image = "${var.ecr_repository_url}:latest"
+    name      = "bookyland-rest-api-container"
+    image     = "${var.ecr_repository_url}:latest"
     essential = true
     portMapping = [{
-        containerPort = 8000
-        hostPort = 8000
+      containerPort = 8000
+      hostPort      = 8000
     }]
     environment = [{
-      name  = "DB_HOST"
+      name  = "DATABASE_HOST"
       value = var.db_endpoint
-    }, {
-      name  = "DB_NAME"
-      value = var.db_name
-    }, {
-      name  = "DB_USER"
-      value = var.db_username
-    }, {
-      name  = "DB_PASSWORD"
-      value = var.db_password
     }]
+    secrets = [
+      {
+        name  = "DATABASE_USER_PASSWORD"
+        value = var.secret_db_password_arn
+      },
+      {
+        name      = "DATABASE_NAME"
+        valueFrom = var.secret_db_name_arn
+      },
+      {
+        name      = "DATABASE_USER"
+        valueFrom = var.secret_db_username_arn
+      },
+    ]
   }])
 }
 
 
 resource "aws_ecs_service" "main" {
-  name = "fastapi-bookyland-service"
-  cluster = aws_ecs_cluster.main.id
+  name            = "fastapi-bookyland-service"
+  cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.main.arn
-  desired_count = 1
-  launch_type = "FARGATE"
+  desired_count   = 1
+  launch_type     = "FARGATE"
   network_configuration {
-    subnets = var.subnets_id
+    subnets          = var.subnets_id
     assign_public_ip = true
-    security_groups = [aws_security_group.ecs.id]
+    security_groups  = [var.ecs_security_group_id]
+  }
+
+  load_balancer {
+    target_group_arn = var.lb_target_group_arn
+    container_name   = "fastapi-container"
+    container_port   = 8000
   }
 }

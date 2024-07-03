@@ -43,12 +43,27 @@ resource "aws_iam_role" "ecs_task_execution_role" {
     Ensures that ECS has the necessary permissions to manage and run tasks. 
     This includes pulling container images from ECR and writing logs to CloudWatch.
   */
-  managed_policy_arns = [ 
+  managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-   ]
+  ]
 }
 
-resource "aws_iam_policy" "ecs_task_policy" { 
+
+resource "aws_iam_role" "ecs_task_role" {
+  name = "ecsTaskRole"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_policy" "ecs_task_policy" {
   name        = "ecsTaskPolicy"
   description = "Policy for ECS tasks to access necessary services"
   // Permiissions the task can perform once they are runing
@@ -60,8 +75,8 @@ resource "aws_iam_policy" "ecs_task_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
           "ecr:BatchCheckLayerAvailability"
@@ -69,25 +84,30 @@ resource "aws_iam_policy" "ecs_task_policy" {
         Resource = "*"
       },
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "rds:DescribeDBInstances",
           "rds:Connect"
         ],
-        Resource = "*"
+        Resource = var.ecr_repository_arn
       },
       {
-        Effect   = "Allow",
-        Action   = [
-          "secretsmanager:GetSecretValue"
-        ],
-        Resource = "*"
-      }
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = [
+          var.secretsmanager_database_name_arn,
+          var.secretsmanager_database_user_arn,
+          var.secretsmanager_database_password_arn,
+        ]
+      },
     ]
   })
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_custom_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
+  role       = aws_iam_role.ecs_task_role.name
   policy_arn = aws_iam_policy.ecs_task_policy.arn
 }

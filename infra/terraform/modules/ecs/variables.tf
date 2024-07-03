@@ -1,40 +1,40 @@
 variable "vpc_id" {
   description = "bookyland VPC id"
-  type = string
+  type        = string
 }
 
 variable "subnets_id" {
   description = "Subnets IDs"
-  type = list(string)
+  type        = list(string)
 }
 
 variable "cluster_name" {
   description = "ECS cluster name"
-  type = string
+  type        = string
 }
 
 variable "ecr_repository_url" {
   description = "ECR respository URL"
-  type = string
+  type        = string
 }
 
 variable "task_role_arn" {
   description = "ARN of task role"
-  type = string
+  type        = string
 }
 
 variable "execution_role_arn" {
   description = "ARN of execution role"
-  type = string
+  type        = string
 }
 
-variable "db_name" {
-  description = "database name"
-  type = string
+variable "secret_db_name_arn" {
+  description = "Secret database name arn"
+  type        = string
 }
 
-variable "db_username" {
-  description = "The username for the database"
+variable "secret_db_username_arn" {
+  description = "The secret username arn for the database"
   type        = string
 }
 variable "db_endpoint" {
@@ -42,8 +42,16 @@ variable "db_endpoint" {
   type        = string
 }
 
-variable "db_password" {
-  description = "The password for the database"
+variable "secret_db_password_arn" {
+  description = "The secret password arn for the database"
   type        = string
   sensitive   = true
+}
+
+variable "ecs_security_group_id" {
+  description = "ECS security group"
+}
+
+variable "lb_target_group_arn" {
+
 }

@@ -4,7 +4,7 @@
 # SUBNET GROUP #
 ################
 resource "aws_db_subnet_group" "main" {
-  name = "main"
+  name       = "main"
   subnet_ids = var.subnet_ids
 }
 
@@ -26,7 +26,7 @@ resource "aws_db_instance" "main" {
   backup_retention_period = 0
   deletion_protection     = false
 
-  vpc_security_group_ids  = [aws_security_group.rds.id]
+  vpc_security_group_ids = [aws_security_group.rds.id]
 }
 
 
@@ -35,17 +35,17 @@ resource "aws_db_instance" "main" {
 ##################
 resource "aws_security_group" "rds" {
   vpc_id = var.vpc_id
-  ingress{
-    from_port = 3306
-    to_port = 3306
-    protocol = "tcp"
-    cidr_blocks = [ "0.0.0.0/0" ]
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-  egress{
-    from_port = 0 // any port
-    to_port = 0
-    protocol = "-1" // any protocol
-    cidr_blocks = [ "0.0.0.0/0" ]
+  egress {
+    from_port   = 0 // any port
+    to_port     = 0
+    protocol    = "-1" // any protocol
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
