@@ -1,3 +1,13 @@
+variable "vpc_id" {
+  description = "The VPC ID"
+  type        = string
+}
+
+variable "subnet_ids" {
+  description = "The subnet IDs"
+  type        = list(string)
+}
+
 variable "db_name" {
   description = "The name of the database"
   type        = string
@@ -17,5 +27,5 @@ variable "db_password" {
 variable "db_instance_class" {
   description = "The instance type for the database"
   type        = string
-  default     = "db.t3.micro"
+  default     = "db.t2.micro"
 }

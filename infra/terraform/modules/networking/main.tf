@@ -1,54 +1,27 @@
-variable "vpc_cidr" {}
-variable "vpc_name" {}
-variable "cidr_public_subnet" {}
-variable "cidr_private_subnet" {}
-variable "us_availability_zone" {}
-
-
-output "vpc_bookyland_id" {
-  value = aws_vpc.bookyland_vpc.id
-}
-
-output "public_subnets_id" {
-  value = aws_subnet.bookyland_public_subnets.*.id
-}
-
-output "public_subnets_cidr_block" {
-  value = aws_subnet.bookyland_public_subnets.*.cidr_block
-}
-
 #######
 # VPC #
 #######
-resource "aws_vpc" "bookyland_vpc" {
-  cidr_block = var.vpc_cidr
-  tags = {
-    Name = var.vpc_name
-  }
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
 }
 
 ###########
 # SUBNETS #
 ###########
-resource "aws_subnet" "bookyland_public_subnets" {
-  count = length(var.cidr_public_subnet)
-  vpc_id = aws_vpc.bookyland_vpc.id
-  cidr_block = element(var.cidr_public_subnet, count.index)
-  availability_zone = element(var.us_availability_zone, count.index)
-  tags = {
-    Name = "bookyland-public-subnet-${count.index + 1}"
-  }
+resource "aws_subnet" "private" {
+  count = 2
+  vpc_id = aws_vpc.main.id
+  cidr_block = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
+  map_public_ip_on_launch = false
+}
+resource "aws_subnet" "public" {
+  count = 2
+  vpc_id = aws_vpc.main.id
+  cidr_block = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + 2)
+  map_public_ip_on_launch = true
 }
 
-resource "aws_subnet" "bookyland_private_subnets" {
-  count = length(var.cidr_private_subnet)
-  vpc_id = aws_vpc.bookyland_vpc.id
-  cidr_block = element(var.cidr_private_subnet, count.index)
-  availability_zone = element(var.us_availability_zone, count.index)
-  tags = {
-    Name = "bookyland-private-subnet-${count.index + 1}"
-  }
-}
+
 
 
 ####################
