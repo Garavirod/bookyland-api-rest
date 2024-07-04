@@ -15,7 +15,7 @@ resource "aws_ecs_task_definition" "main" {
     name      = var.container_name
     image     = "${var.ecr_repository_url}:latest"
     essential = true
-    portMapping = [{
+    portMappings = [{
       containerPort = var.container_port
       hostPort      = var.container_port
     }]
