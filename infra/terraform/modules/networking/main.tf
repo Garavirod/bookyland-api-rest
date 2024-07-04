@@ -12,12 +12,14 @@ resource "aws_subnet" "bookyland_private_subnets" {
   count                   = 2
   vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
+  availability_zone = element(var.eu_availability_zone, count.index)
   map_public_ip_on_launch = false
 }
 resource "aws_subnet" "bookyland_public_subnets" {
   count                   = 2
   vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + 2)
+  availability_zone = element(var.eu_availability_zone, count.index)
   map_public_ip_on_launch = true
 }
 
