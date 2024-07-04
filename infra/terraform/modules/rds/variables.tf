@@ -27,5 +27,5 @@ variable "db_password" {
 variable "db_instance_class" {
   description = "The instance type for the database"
   type        = string
-  default     = "db.t2.micro"
+  default     = "db.t3.micro"
 }

@@ -1,3 +1,3 @@
 resource "aws_ecr_repository" "main" {
-  name = "bookyland-api-rest"
+  name = "${var.application_name}-ecr"
 }

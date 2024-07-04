@@ -4,12 +4,14 @@ module "networking" {
 
 module "ecr" {
   source = "./modules/ecr"
+  application_name = var.application_name
 }
 module "secrets" {
   source            = "./modules/secrets"
   database_name     = var.database_name
   database_user     = var.database_user
   database_password = var.database_password
+  application_name = var.application_name
 }
 
 module "iam" {
@@ -23,19 +25,23 @@ module "iam" {
 
 module "security_group" {
   source = "./modules/security-group"
+  vpc_id = module.networking.vpc_id
 }
 
 module "load_balancer" {
   source                = "./modules/load-balancer"
   vpc_id                = module.networking.vpc_id
   security_group_ecs_id = module.security_group.ecs_security_group_id
-  public_subnets_id      = module.networking.public_subnets_id
+  public_subnets_id     = module.networking.public_subnets_id
+  application_name = var.application_name
 }
 
 module "lb_target_group" {
   source            = "./modules/loadbalancer-target-group"
   load_balancer_arn = module.load_balancer.load_balancer_arn
   vpc_id            = module.networking.vpc_id
+  application_name  = var.application_name
+  container_port    = 8000
 }
 
 module "ecs" {
@@ -52,6 +58,10 @@ module "ecs" {
   db_endpoint            = module.rds.db_endpoint
   lb_target_group_arn    = module.lb_target_group.aws_lb_target_group_arn
   ecs_security_group_id  = module.security_group.ecs_security_group_id
+  lb_listener            = module.lb_target_group.load_balancer_listener
+  application_name       = var.application_name
+  container_name         = "bookyland"
+  container_port         = 8000
 }
 
 module "rds" {

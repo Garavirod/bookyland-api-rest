@@ -3,7 +3,7 @@ resource "aws_ecs_cluster" "main" {
 }
 
 resource "aws_ecs_task_definition" "main" {
-  family                   = "fast-api-task"
+  family                   = "${var.application_name}-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -12,12 +12,12 @@ resource "aws_ecs_task_definition" "main" {
   task_role_arn            = var.task_role_arn
 
   container_definitions = jsonencode([{
-    name      = "bookyland-rest-api-container"
+    name      = var.container_name
     image     = "${var.ecr_repository_url}:latest"
     essential = true
     portMapping = [{
-      containerPort = 8000
-      hostPort      = 8000
+      containerPort = var.container_port
+      hostPort      = var.container_port
     }]
     environment = [{
       name  = "DATABASE_HOST"
@@ -25,8 +25,8 @@ resource "aws_ecs_task_definition" "main" {
     }]
     secrets = [
       {
-        name  = "DATABASE_USER_PASSWORD"
-        value = var.secret_db_password_arn
+        name      = "DATABASE_USER_PASSWORD"
+        valueFrom = var.secret_db_password_arn
       },
       {
         name      = "DATABASE_NAME"
@@ -42,20 +42,22 @@ resource "aws_ecs_task_definition" "main" {
 
 
 resource "aws_ecs_service" "main" {
-  name            = "fastapi-bookyland-service"
+  name            = "${var.application_name}-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.main.arn
   desired_count   = 1
   launch_type     = "FARGATE"
   network_configuration {
-    subnets          = var.subnets_id
-    assign_public_ip = true
-    security_groups  = [var.ecs_security_group_id]
+    subnets = var.subnets_id
+    //assign_public_ip = true
+    security_groups = [var.ecs_security_group_id]
   }
 
   load_balancer {
     target_group_arn = var.lb_target_group_arn
-    container_name   = "fastapi-container"
-    container_port   = 8000
+    container_name   = var.container_name
+    container_port   = var.container_port
   }
+
+  depends_on = [var.lb_listener]
 }

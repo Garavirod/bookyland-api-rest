@@ -1,3 +1,8 @@
+variable "application_name" {
+  description = "Application name"
+  default     = "bookyland"
+  type        = string
+}
 # Secrets RDS
 variable "database_name" {
   type        = string
@@ -20,5 +25,5 @@ variable "database_user" {
 variable "db_instance_class" {
   description = "The instance type for the database"
   type        = string
-  default     = "db.t2.micro"
+  default     = "db.t3.micro"
 }

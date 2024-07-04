@@ -15,3 +15,7 @@ variable "database_user" {
   sensitive   = true
   description = "Database username"
 }
+
+variable "application_name" {
+  type = string
+}

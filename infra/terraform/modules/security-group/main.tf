@@ -1,5 +1,6 @@
 resource "aws_security_group" "ecs_security_group" {
-  name_prefix = "ecs-security-group"
+  name_prefix = "${var.application_name}-sg"
+  vpc_id      = var.vpc_id
   ingress {
     from_port   = 80
     to_port     = 80

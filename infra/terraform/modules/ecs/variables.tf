@@ -55,3 +55,20 @@ variable "ecs_security_group_id" {
 variable "lb_target_group_arn" {
 
 }
+
+variable "lb_listener" {
+
+}
+
+variable "application_name" {
+  description = "Application name"
+  default     = "bookyland"
+  type        = string
+}
+
+variable "container_port" {
+
+}
+variable "container_name" {
+
+}
