@@ -1,5 +1,6 @@
 module "networking" {
   source = "./modules/networking"
+  eu_availability_zone = var.eu_availability_zone
 }
 
 module "ecr" {
