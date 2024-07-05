@@ -1,5 +1,5 @@
 resource "aws_secretsmanager_secret" "database_name" {
-  name        = "${var.application_name}-secret/database_name"
+  name        = "${var.application_name}-secret-s/database_name"
   description = "Database name for Bookyland"
 }
 
@@ -9,7 +9,7 @@ resource "aws_secretsmanager_secret_version" "database_name_version" {
 }
 
 resource "aws_secretsmanager_secret" "database_user" {
-  name        = "${var.application_name}-secret/database_user"
+  name        = "${var.application_name}-secret-s/database_user"
   description = "Database user for Bookyland"
 }
 
@@ -19,7 +19,7 @@ resource "aws_secretsmanager_secret_version" "database_user_version" {
 }
 
 resource "aws_secretsmanager_secret" "database_password" {
-  name        = "${var.application_name}-secret/database_password"
+  name        = "${var.application_name}-secret-s/database_password"
   description = "Database password for Bookyland"
 }
 

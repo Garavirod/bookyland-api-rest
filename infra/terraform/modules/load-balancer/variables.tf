@@ -1,7 +1,7 @@
 variable "vpc_id" {
 }
 
-variable "security_group_ecs_id" {
+variable "alb_security_group_id" {
 
 }
 

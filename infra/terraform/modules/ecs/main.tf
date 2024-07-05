@@ -19,6 +19,14 @@ resource "aws_ecs_task_definition" "main" {
       containerPort = var.container_port
       hostPort      = var.container_port
     }]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-group         = "/ecs/${var.application_name}"
+        awslogs-region        = "us-east-1"
+        awslogs-stream-prefix = "ecs"
+      }
+    }
     environment = [{
       name  = "DATABASE_HOST"
       value = var.db_endpoint
@@ -49,7 +57,7 @@ resource "aws_ecs_service" "main" {
   launch_type     = "FARGATE"
   network_configuration {
     subnets = var.subnets_id
-    //assign_public_ip = true
+    assign_public_ip = true
     security_groups = [var.ecs_security_group_id]
   }
 

@@ -3,6 +3,10 @@ module "networking" {
   eu_availability_zone = var.eu_availability_zone
 }
 
+module "cloudwatch" {
+  source = "./modules/cloudwatch"
+}
+
 module "ecr" {
   source = "./modules/ecr"
   application_name = var.application_name
@@ -32,7 +36,7 @@ module "security_group" {
 module "load_balancer" {
   source                = "./modules/load-balancer"
   vpc_id                = module.networking.vpc_id
-  security_group_ecs_id = module.security_group.ecs_security_group_id
+  alb_security_group_id = module.security_group.alb_security_group
   public_subnets_id     = module.networking.public_subnets_id
   application_name = var.application_name
 }

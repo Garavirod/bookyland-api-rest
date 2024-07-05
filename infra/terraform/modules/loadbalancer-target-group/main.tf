@@ -4,9 +4,9 @@ resource "aws_lb_target_group" "bookyland_tg" {
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
   target_type = "ip"
-
   health_check {
     path                = "/"
+    port                = var.container_port
     protocol            = "HTTP"
     matcher             = "200-299"
     interval            = 30
