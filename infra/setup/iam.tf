@@ -1,19 +1,23 @@
-#######################################
-# Create IAM user and policies for CD #
-#######################################
-
-resource "aws_iam_user" "cd_bookyland" {
-  name = "bookyland-app-cd"
-}
-
-resource "aws_iam_access_key" "cd_bookyland" {
-  user = aws_iam_user.cd_bookyland.name
+#############
+# CODEBUILD #
+#############
+// IAM role for codebuild
+resource "aws_iam_role" "codebuild_role" {
+  name = "${var.application_name}-codebuild-role"
+  assume_role_policy = jsonencode({
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "codebuild.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
 }
 
 ########################################################
 # Policy for terraform backend to s3 and Dynamo access #
 ########################################################
-
 data "aws_iam_policy_document" "tf_backend" {
   statement {
     effect    = "Allow"
@@ -45,23 +49,21 @@ data "aws_iam_policy_document" "tf_backend" {
   }
 }
 
-
 resource "aws_iam_policy" "tf_backend" {
-  name        = "${aws_iam_user.cd_bookyland.name}-tf-s3-dynamo"
-  description = "Allow user to use s3 and dynamo as backend state and lock"
+  name        = "${var.application_name}-codebuild-tf-s3-dynamo"
+  description = "Allow CodeBuild to use s3 and dynamo as backend state and lock"
   policy      = data.aws_iam_policy_document.tf_backend.json
 }
 
-resource "aws_iam_user_policy_attachment" "tf_backend" {
-  user       = aws_iam_user.cd_bookyland.name
+resource "aws_iam_role_policy_attachment" "tf_backend" {
+  role = aws_iam_role.codebuild_role.arn
   policy_arn = aws_iam_policy.tf_backend.arn
 }
 
-#########################
-# Policy for ECR access #
-#########################
 
-
+############################
+# CodeBuild ECR doc policy #
+############################
 data "aws_iam_policy_document" "ecr" {
   statement {
     effect    = "Allow"
@@ -79,18 +81,154 @@ data "aws_iam_policy_document" "ecr" {
       "ecr:PutImage"
     ]
     resources = [
-      aws_ecr_repository.app.arn
+      aws_ecr_repository.app.arn,
+      aws_ecr_repository.proxy.arn
     ]
   }
 }
 
 resource "aws_iam_policy" "ecr" {
-  name        = "${aws_iam_user.cd_bookyland.name}-ecr"
-  description = "Allow user cd to manage ECR resources"
-  policy      = data.aws_iam_policy_document.ecr.json
+  name = "${var.application_name}-ecr"
+  description = "Allow CodeBuild to manage ECR"
+  policy = data.aws_iam_policy_document.ecr.json
 }
 
-resource "aws_iam_user_policy_attachment" "name" {
-  user       = aws_iam_user.cd_bookyland.name
+resource "aws_iam_role_policy_attachment" "ecr" {
+  role = aws_iam_role.codebuild_role.arn
   policy_arn = aws_iam_policy.ecr.arn
 }
+
+############################
+# Codebuild ECS doc policy #
+############################
+
+data "aws_iam_policy_document" "codebuild_ecs" {
+  statement {
+    effect = "Allow"
+    actions = [ 
+      "ecs:DescribeClusters",
+      "ecs:DeregisterTaskDefinition",
+      "ecs:DeleteCluster",
+      "ecs:DescribeServices",
+      "ecs:UpdateService",
+      "ecs:DeleteService",
+      "ecs:DescribeTaskDefinition",
+      "ecs:CreateService",
+      "ecs:RegisterTaskDefinition",
+      "ecs:CreateCluster",
+      "ecs:UpdateCluster",
+      "ecs:TagResource",
+     ]
+    resources = [ 
+      "*"
+     ]
+  }
+}
+resource "aws_iam_policy" "ecs" {
+  name = "${var.application_name}-ecs"
+  description = "Allow CodeBuild to manage ECS"
+  policy = data.aws_iam_policy_document.codebuild_ecs.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecs" {
+  role = aws_iam_role.codebuild_role.arn
+  policy_arn = aws_iam_policy.ecs.arn
+}
+
+#########################################
+# CodeBuild s3 policy doc for artifacts #
+#########################################
+
+data "aws_iam_policy_document" "codebuild_s3" {
+  statement {
+    effect = "Allow"
+    actions = [ 
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:GetBucketLocation"
+     ]
+     resources = [ "*" ]
+  }
+}
+resource "aws_iam_policy" "s3_artifacts" {
+  name = "${var.application_name}-s3-artifacts"
+  description = "Allow CodeBuild to manage S3 artifacts"
+  policy = data.aws_iam_policy_document.codebuild_s3.json
+}
+
+resource "aws_iam_role_policy_attachment" "s3_artifacts" {
+  role = aws_iam_role.codebuild_role.arn
+  policy_arn = aws_iam_policy.s3_artifacts.arn
+}
+
+#############################
+# CodeBuild doc policy logs #
+#############################
+
+data "aws_iam_policy_document" "codebuild_logs" {
+  statement {
+    effect = "Allow"
+    actions = [ 
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+     ]
+  }
+}
+resource "aws_iam_policy" "logs" {
+  name = "${var.application_name}"
+  description = "Allow CodeBuild manage Logs"
+  policy = data.aws_iam_policy_document.codebuild_logs.json
+}
+
+resource "aws_iam_role_policy_attachment" "logs" {
+  role = aws_iam_role.codebuild_role.arn
+  policy_arn = aws_iam_policy.logs.arn
+}
+
+##################################
+# CodeBuild doc policy pass role #
+##################################
+data "aws_iam_policy_document" "codebuild_pass_role" {
+  statement {
+    effect = "Allow"
+    actions = [ 
+                "iam:PassRole",
+     ]
+     resources = [ "*" ]
+  }
+}
+resource "aws_iam_policy" "pass_role" {
+  name = "${var.application_name}"
+  description = "Allow CodeBuild pass role"
+  policy = data.aws_iam_policy_document.codebuild_pass_role.json
+}
+
+#####################################
+# CodeBuild doc policy codepipeline #
+#####################################
+data "aws_iam_policy_document" "codebuild_codepipeline" {
+  statement {
+    effect = "Allow"
+    actions = [ "codepipeline:StartPipelineExecution" ]
+    resources = [ "*" ]
+  }
+}
+resource "aws_iam_policy" "codepipeline" {
+  name = "${var.application_name}-codepipeline"
+  description = "Allow CodeBuild project to programmatically start the execution"
+  policy = data.aws_iam_policy_document.codebuild_codepipeline.json
+}
+resource "aws_iam_role_policy_attachment" "codepipeline_excec" {
+  role = aws_iam_role.codebuild_role.arn
+  policy_arn = aws_iam_policy.codepipeline.arn
+}
+
+
+
+
+
+
+
+
+

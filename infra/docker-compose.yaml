@@ -5,7 +5,7 @@ services:
       - ./setup:/tf/setup
       - ./deploy:/tf/deploy
     working_dir: /tf
-    environment:
+    environment: # AWS credentials are set via AWS vault on behalf
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
