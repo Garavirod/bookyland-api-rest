@@ -197,25 +197,23 @@ resource "aws_iam_role_policy_attachment" "codepipeline_excec" {
   role = aws_iam_role.codebuild_role.arn
   policy_arn = aws_iam_policy.codepipeline.arn
 }
-// Secrets manager
-data "aws_iam_policy_document" "codebuild_secrets" {
+// Parameter store
+data "aws_iam_policy_document" "codebuild_parameter_store" {
   statement {
     effect = "Allow"
     actions = [ 
-       "secretsmanager:GetSecretValue",
-       "ec2:Describe*",
+       "ssm:GetParameter",
      ]
   }
 }
-resource "aws_iam_policy" "codebuild_secrets" {
-  name = "${var.application_name}-secrets-codebuild"
-  description = "Allow to codebuild manage secrets manager"
-  policy = data.aws_iam_policy_document.codebuild_secrets.json
+resource "aws_iam_policy" "codebuild_parameter_store" {
+  name = "${var.application_name}-codebuild-parameter-store"
+  description = "Allow to codebuild manage parameter store"
+  policy = data.aws_iam_policy_document.codebuild_parameter_store.json
 }
-
-resource "aws_iam_role_policy_attachment" "codebuild_secrets" {
+resource "aws_iam_role_policy_attachment" "codebuild_parameter_store" {
   role = aws_iam_role.codebuild_role.arn
-  policy_arn = aws_iam_policy.codebuild_secrets.arn
+  policy_arn = aws_iam_policy.codebuild_parameter_store.arn
 }
 
 ########################
@@ -234,31 +232,11 @@ resource "aws_codebuild_project" "codebuild" {
     image                       = "aws/codebuild/standard:5.0"
     type                        = "LINUX_CONTAINER"
     privileged_mode             = true
-
-    environment_variable {
-      name  = "AWS_DEFAULT_REGION"
-      value = "us-east-1"
-    }
-    environment_variable {
-      name  = "TF_VAR_DATABASE_NAME"
-      value = "database_name" # Retrieve from Secrets Manager in buildspec
-      type = "SECRETS_MANAGER"
-    }
-    environment_variable {
-      name  = "TF_VAR_DATABASE_USER"
-      value = "database_user" # Retrieve from Secrets Manager in buildspec
-      type = "SECRETS_MANAGER"
-    }
-    environment_variable {
-      name  = "TF_VAR_DATABASE_USER_PASSWORD"
-      value = "database_user_password" # Retrieve from Secrets Manager in buildspec
-      type = "SECRETS_MANAGER"
-    }
   }
 
   source {
     type = "GITHUB"
-    location = "https://github.com/Garavirod/bookyland-api-rest"
+    location = var.github_url_repo
     buildspec = file("buildspec.yaml")
   }
 }

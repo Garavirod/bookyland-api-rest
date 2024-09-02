@@ -8,11 +8,9 @@ phases:
       - pip install awscli --upgrade --user
 
       # Fetch the secrets from AWS Secrets Manager
-      - echo "Fetching RDS credentials from Secrets Manager..."
-      - export SECRET_STRING=$(aws secretsmanager get-secret-value --secret-id your-secret-id --query SecretString --output text)
-
+      - echo "Fetching RDS credentials from Parameter Store"
       # Parse the secret JSON and export as TF_VAR environment variables
-      - export TF_VAR_database_user_password=$(echo $SECRET_STRING | jq -r '.database_user_password')
+      - export TF_VAR_database_user_password=$(aws ssm get-parameter --name "your-parameter-name" --with-decryption --query "Parameter.Value" --output text)
 
   build:
     commands:
