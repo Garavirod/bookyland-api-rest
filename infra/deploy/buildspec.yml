@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      # Install the AWS CLI if not already available
+      - echo "Installing dependencies..."
+      - pip install awscli --upgrade --user
+
+      # Fetch the secrets from AWS Secrets Manager
+      - echo "Fetching RDS credentials from Secrets Manager..."
+      - export SECRET_STRING=$(aws secretsmanager get-secret-value --secret-id your-secret-id --query SecretString --output text)
+
+      # Parse the secret JSON and export as TF_VAR environment variables
+      - export TF_VAR_database_user_password=$(echo $SECRET_STRING | jq -r '.database_user_password')
+
+  build:
+    commands:
+      - echo "Starting Terraform deployment..."
+      - cd infra
+      - terraform init
+      - terraform apply -auto-approve
+
+artifacts:
+  files:
+    - "**/*"
+  discard-paths: yes
+
