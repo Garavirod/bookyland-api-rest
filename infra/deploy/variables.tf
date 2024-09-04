@@ -23,26 +23,6 @@ variable "prefix" {
   description = "Prefix for resources in AWS"
   default     = "bookyland"
 }
-// github
-variable "github_user_name" {
-  description = "Github Username"
-  default = "Garavirod"
-}
-
-variable "github_url_repo" {
-  description = "Github repository project url"
-  default = "https://github.com/Garavirod/bookyland-api-rest"
-}
-
-variable "github_repository_name" {
-  description = "Github repository project"
-  default = "bookyland-api-rest"
-}
-
-variable "github_oauthtoken" {
-  description = "Github token for access into repo"
-  sensitive = true
-}
 // Parameter store
 variable "database_user_password" {
   description = "Database user password"
