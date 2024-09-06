@@ -1,7 +1,9 @@
 ########################
 # Codebuild definition #
 ########################
-resource "aws_codebuild_project" "codebuild" {
+
+// Deployment for dev
+resource "aws_codebuild_project" "deploy_dev" {
   name         = "${var.application_name}-codebuild"
   service_role = aws_iam_role.codebuild_role.arn
 
@@ -38,6 +40,31 @@ resource "aws_codebuild_project" "codebuild" {
 
   source {
     type      = "CODEPIPELINE"
-    buildspec = file("buildspec.yaml")
+    buildspec = file("buildspec-deploy.yaml")
+  }
+}
+
+
+// Destroy dev infra
+resource "aws_codebuild_project" "destroy_dev" {
+  name         = "${var.application_name}-destroy-infra"
+  service_role = aws_iam_role.codebuild_role.arn
+  artifacts {
+    type = "CODEPIPELINE"
+  }
+  environment {
+    compute_type    = "BUILD_GENERAL1_SMALL"
+    image           = "aws/codebuild/standard:5.0"
+    type            = "LINUX_CONTAINER"
+    privileged_mode = true
+
+    environment_variable {
+      name  = "TF_WORKSPACE"
+      value = "dev"
+    }
+  }
+  source {
+    type      = "CODEPIPELINE"
+    buildspec = file("buildspec-destroy.yaml")
   }
 }
