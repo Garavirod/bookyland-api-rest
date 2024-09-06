@@ -1,12 +1,5 @@
 version: 0.2
 
-env:
-  variables:
-    ECR_URI: "ECR_URI"
-    AWS_REGION: "AWS_REGION"
-    TF_WORKSPACE: $CODEBUILD_WEBHOOK_TRIGGER
-    SSM_PARAM_DB_PASSWORD_NAME: $SSM_PARAM_DB_PASSWORD_NAME
-
 phases:
   pre_build:
     commands:
