@@ -23,3 +23,8 @@ variable "prefix" {
   description = "Prefix for resources in AWS"
   default     = "bookyland"
 }
+// Parameter store
+variable "database_user_password" {
+  description = "Database user password"
+  sensitive = true
+}
