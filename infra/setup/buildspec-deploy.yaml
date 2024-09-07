@@ -1,12 +1,5 @@
 version: 0.2
 
-env:
-  variables:
-    ECR_URI: "ECR_URI"
-    AWS_REGION: "AWS_REGION"
-    TF_WORKSPACE: $CODEBUILD_WEBHOOK_TRIGGER
-    SSM_PARAM_DB_PASSWORD_NAME: $SSM_PARAM_DB_PASSWORD_NAME
-
 phases:
   pre_build:
     commands:
@@ -31,9 +24,10 @@ phases:
 
       # Initialize and apply Terraform
       - echo Initializing and applying Terraform...
-      - docker-compose run --rm terraform init
-      - docker-compose run --rm terraform workspace select $TF_WORKSPACE || docker-compose run --rm terraform workspace new $TF_WORKSPACE
-      - docker-compose run --rm terraform apply -auto-approve
+      - cd infra/
+      - docker-compose run --rm terraform -chdir=deploy init
+      - docker compose run --rm terraform -chdir=deploy/ workspace select -or-create $TF_WORKSPACE
+      - docker-compose run --rm terraform -chdir=deploy apply -auto-approve
 
       # Done
       - echo "Terraform deployment completed for environment $TF_WORKSPACE."
