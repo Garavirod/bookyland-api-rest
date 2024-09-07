@@ -39,3 +39,9 @@ variable "github_oauthtoken" {
   description = "Github token for access into repo"
   sensitive   = true
 }
+
+// Parameter store
+variable "database_user_password" {
+  description = "Database user password"
+  sensitive = true
+}
