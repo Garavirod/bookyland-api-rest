@@ -1,4 +1,4 @@
-/* ########################
+########################
 # Codebuild definition #
 ########################
 
@@ -46,7 +46,7 @@ resource "aws_codebuild_project" "deploy_dev" {
 
 
 // Destroy dev infra
-resource "aws_codebuild_project" "destroy_dev" {
+/* resource "aws_codebuild_project" "destroy_dev" {
   name         = "${var.application_name}-destroy-infra"
   service_role = aws_iam_role.codebuild_role.arn
   artifacts {
@@ -67,6 +67,4 @@ resource "aws_codebuild_project" "destroy_dev" {
     type      = "CODEPIPELINE"
     buildspec = file("buildspec-destroy.yaml")
   }
-}
-
- */
+} */

@@ -1,4 +1,4 @@
-/* ###########################
+###########################
 # CodePipeline Definition #
 ###########################
 
@@ -50,7 +50,7 @@ resource "aws_codepipeline" "deploy" {
 }
 
 // For terraform destroy
-resource "aws_codepipeline" "destroy" {
+/* resource "aws_codepipeline" "destroy" {
   name     = "${var.application_name}-codepipeline-destroy"
   role_arn = aws_iam_role.codepipeline_role.arn
 
@@ -101,5 +101,5 @@ resource "aws_codepipeline" "destroy" {
     type     = "S3"
     location = aws_s3_bucket.s3_artifact.bucket
   }
-}
- */
+} */
+

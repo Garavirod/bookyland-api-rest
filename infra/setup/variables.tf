@@ -20,7 +20,7 @@ variable "tf_state_lock_table" {
 }
 
 // Github
-/* variable "github_user_name" {
+variable "github_user_name" {
   description = "Github Username"
   default     = "Garavirod"
 }
@@ -34,10 +34,3 @@ variable "github_repository_name" {
   description = "Github repository project"
   default     = "bookyland-api-rest"
 }
-
-// Parameter store
-variable "database_user_password" {
-  description = "Database user password"
-  sensitive = true
-}
- */
