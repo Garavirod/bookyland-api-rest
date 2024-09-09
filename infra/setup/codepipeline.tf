@@ -1,4 +1,4 @@
-###########################
+/* ###########################
 # CodePipeline Definition #
 ###########################
 
@@ -102,3 +102,4 @@ resource "aws_codepipeline" "destroy" {
     location = aws_s3_bucket.s3_artifact.bucket
   }
 }
+ */

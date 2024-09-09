@@ -1,4 +1,4 @@
-########################
+/* ########################
 # Codebuild definition #
 ########################
 
@@ -68,3 +68,5 @@ resource "aws_codebuild_project" "destroy_dev" {
     buildspec = file("buildspec-destroy.yaml")
   }
 }
+
+ */

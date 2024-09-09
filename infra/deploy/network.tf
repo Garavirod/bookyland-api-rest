@@ -1,4 +1,4 @@
-#################
+/* #################
 # Network infra #
 #################
 
@@ -101,3 +101,4 @@ resource "aws_subnet" "private_b" {
     Name = "${local.prefix}-private-b"
   }
 }
+ */
