@@ -1,68 +1,105 @@
-/* ###########################
+###########################
 # CodePipeline Definition #
 ###########################
-resource "aws_codepipeline" "aws_codepipeline" {
-  name = "${var.application_name}-codepipeline"
+
+// For terraform deployments
+resource "aws_codepipeline" "deploy" {
+
+  name     = "${var.application_name}-codepipeline"
   role_arn = aws_iam_role.codepipeline_role.arn
- # Stages definition
- stage {
-   name = "Source"
+
+  # Dev 
+  stage {
+    name = "Source_Dev"
     action {
-      name             = "Source"
+      name             = "Source_Dev"
       category         = "Source"
-      owner            = "ThirdParty"
-      provider         = "GitHub"
+      owner            = "AWS"
+      provider         = "CodeStarSourceConnection"
       version          = "1"
-      output_artifacts = ["source_output"]
+      output_artifacts = ["source_output_dev"]
 
       configuration = {
-        Owner  = var.github_user_name
-        Repo   = var.github_repository_name
-        Branch = var.github_branch_name
-        OAuthToken = var.github_oauthtoken
+        ConnectionArn    = aws_codestarconnections_connection.github_connection.arn
+        FullRepositoryId = "${var.github_user_name}/${var.github_repository_name}"
+        BranchName       = "dev"
       }
-   }
- }
+    }
+  }
 
- stage {
-   name = "Build"
-   action {
-     name             = "Build"
+  stage {
+    name = "Build_Dev"
+    action {
+      name             = "Build_Dev"
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
       version          = "1"
-      input_artifacts  = ["source_output"]
-      output_artifacts = ["build_output"]
+      input_artifacts  = ["source_output_dev"]
+      output_artifacts = ["build_output_dev"]
 
       configuration = {
-        ProjectName = aws_codebuild_project.codebuild.name
+        ProjectName = aws_codebuild_project.deploy_dev.name
       }
-   }
- }
-
- stage {
-   name = "Deploy"
-   action {
-     name             = "Deploy"
-      category         = "Deploy"
-      owner            = "AWS"
-      provider         = "ECS"
-      version          = "1"
-      input_artifacts  = ["build_output"]
-
-      configuration = {
-        ClusterName   = aws_ecs_cluster.cluster.name
-        ServiceName   = aws_ecs_service.service.name
-        FileName      = "imagedefinitions.json"
-      }
-   }
- }
- artifact_store {
-   type = "s3"
-   location = aws_s3_bucket.s3_artifact.bucket
- }
+    }
+  }
+  artifact_store {
+    type     = "S3"
+    location = aws_s3_bucket.s3_artifact.bucket
+  }
 }
 
+// For terraform destroy
+/* resource "aws_codepipeline" "destroy" {
+  name     = "${var.application_name}-codepipeline-destroy"
+  role_arn = aws_iam_role.codepipeline_role.arn
 
- */
+  stage {
+    name = "Source_Destroy"
+    action {
+      name             = "Source_Destroy"
+      category         = "Source"
+      owner            = "AWS"
+      provider         = "CodeStarSourceConnection"
+      version          = "1"
+      output_artifacts = ["source_destroy_dev"]
+
+      configuration = {
+        ConnectionArn    = aws_codestarconnections_connection.github_connection.arn
+        FullRepositoryId = "${var.github_user_name}/${var.github_repository_name}"
+        BranchName       = "dev"
+      }
+    }
+  }
+
+  stage {
+    name = "Approval_Destroy"
+    action {
+      name     = "Approval_Destroy"
+      category = "Approval"
+      owner    = "AWS"
+      provider = "Manual"
+      version  = "1"
+    }
+  }
+
+  stage {
+    name = "Destroy"
+    action {
+      name            = "DestoryTerraformDeployment"
+      category        = "Build"
+      owner           = "AWS"
+      provider        = "CodeBuild"
+      version         = "1"
+      input_artifacts = ["source_destroy_dev"]
+      configuration = {
+        ProjectName = aws_codebuild_project.destroy_dev.name
+      }
+    }
+  }
+  artifact_store {
+    type     = "S3"
+    location = aws_s3_bucket.s3_artifact.bucket
+  }
+} */
+

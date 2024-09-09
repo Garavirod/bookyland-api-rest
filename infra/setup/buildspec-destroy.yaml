@@ -1,0 +1,14 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Initializing Terraform for Destroy..."
+      - docker-compose run --rm terraform -chdir=deploy/ init
+      - docker compose run --rm terraform -chdir=deploy/ workspace select -or-create $TF_WORKSPACE
+
+  build:
+    commands:
+      - echo "Destroying Terraform infrastructure..."
+      - cd infra/
+      - docker-compose run --rm terraform -chdir=deploy/ destroy -auto-approve

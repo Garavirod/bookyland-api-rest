@@ -1,7 +1,6 @@
 ######################################
 # Codebuild role and iam permissions #
 ######################################
-
 // IAM role for codebuild
 resource "aws_iam_role" "codebuild_role" {
   name = "${var.application_name}-codebuild-role"
@@ -56,6 +55,7 @@ resource "aws_iam_role_policy_attachment" "tf_backend" {
   role       = aws_iam_role.codebuild_role.name
   policy_arn = aws_iam_policy.tf_backend.arn
 }
+
 // CodeBuild ECR doc policy 
 data "aws_iam_policy_document" "ecr" {
   statement {
@@ -89,6 +89,7 @@ resource "aws_iam_role_policy_attachment" "ecr" {
   role       = aws_iam_role.codebuild_role.name
   policy_arn = aws_iam_policy.ecr.arn
 }
+
 // Codebuild ECS doc policy 
 data "aws_iam_policy_document" "codebuild_ecs" {
   statement {
@@ -122,16 +123,22 @@ resource "aws_iam_role_policy_attachment" "ecs" {
   role       = aws_iam_role.codebuild_role.name
   policy_arn = aws_iam_policy.ecs.arn
 }
+
 // CodeBuild s3 policy doc for artifacts 
 data "aws_iam_policy_document" "s3" {
   statement {
     effect = "Allow"
     actions = [
       "s3:GetObject",
+      "s3:GetObjectVersion",
+      "s3:GetBucketVersioning",
+      "s3:PutObjectAcl",
       "s3:PutObject",
-      "s3:GetBucketLocation"
     ]
-    resources = ["*"]
+    resources = [
+      aws_s3_bucket.s3_artifact.arn,
+      "${aws_s3_bucket.s3_artifact.arn}/*"
+    ]
   }
 }
 resource "aws_iam_policy" "s3_artifacts" {
@@ -144,6 +151,7 @@ resource "aws_iam_role_policy_attachment" "s3_artifacts" {
   role       = aws_iam_role.codebuild_role.name
   policy_arn = aws_iam_policy.s3_artifacts.arn
 }
+
 // CodeBuild doc policy logs 
 data "aws_iam_policy_document" "logs" {
   statement {
@@ -165,7 +173,8 @@ resource "aws_iam_role_policy_attachment" "logs" {
   role       = aws_iam_role.codebuild_role.name
   policy_arn = aws_iam_policy.logs.arn
 }
-// CodeBuild doc policy pass role #
+
+// CodeBuild doc policy pass role 
 data "aws_iam_policy_document" "pass_role" {
   statement {
     effect = "Allow"
@@ -180,6 +189,7 @@ resource "aws_iam_policy" "pass_role" {
   description = "Allow CodeBuild pass role"
   policy      = data.aws_iam_policy_document.pass_role.json
 }
+
 // CodeBuild doc policy codepipeline
 data "aws_iam_policy_document" "codepipeline_codebuild" {
   statement {
@@ -197,6 +207,7 @@ resource "aws_iam_role_policy_attachment" "codepipeline_excec" {
   role       = aws_iam_role.codebuild_role.name
   policy_arn = aws_iam_policy.codepipeline.arn
 }
+
 // Parameter store
 data "aws_iam_policy_document" "codebuild_parameter_store" {
   statement {
@@ -204,7 +215,7 @@ data "aws_iam_policy_document" "codebuild_parameter_store" {
     actions = [
       "ssm:GetParameter",
     ]
-    resources = ["*"]
+    resources = [aws_ssm_parameter.database_user_password.arn]
   }
 }
 resource "aws_iam_policy" "codebuild_parameter_store" {
@@ -220,44 +231,34 @@ resource "aws_iam_role_policy_attachment" "codebuild_parameter_store" {
 #########################################
 # CodePipeline role and iam permissions #
 #########################################
-resource "aws_iam_role" "codepipeline_role" {
-  name = "${var.application_name}-codepipeline-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "codepipeline.amazonaws.com"
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-// S3 artifacts policy permissions
-data "aws_iam_policy_document" "codepipeline_s3" {
+data "aws_iam_policy_document" "assume_role" {
   statement {
     effect = "Allow"
-    actions = [
-      "s3:GetObject",
-      "s3:PutObject",
-      "s3:GetBucketLocation"
-    ]
-    resources = ["*"]
+    principals {
+      type        = "Service"
+      identifiers = ["codepipeline.amazonaws.com"]
+    }
+    actions = ["sts:AssumeRole"]
   }
 }
 
+resource "aws_iam_role" "codepipeline_role" {
+  name               = "${var.application_name}-codepipeline-role"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
+
+// S3 artifacts policy permissions
 resource "aws_iam_policy" "codebuild_s3" {
   name        = "${var.application_name}-codepipeline-s3"
   description = "Allow codepipeline mange s3 for artifacts"
-  policy      = data.aws_iam_policy_document.codepipeline_s3.json
+  policy      = data.aws_iam_policy_document.s3.json
 }
 
 resource "aws_iam_role_policy_attachment" "codebuild_s3" {
   role       = aws_iam_role.codepipeline_role.name
   policy_arn = aws_iam_policy.codebuild_s3.arn
 }
+
 // Codepipeline policy permissions
 data "aws_iam_policy_document" "codepipeline_exec" {
   statement {
@@ -291,6 +292,7 @@ resource "aws_iam_role_policy_attachment" "codepipeline_exec" {
   role       = aws_iam_role.codepipeline_role.name
   policy_arn = aws_iam_policy.codebuild_exec.arn
 }
+
 // Codepipeline ECS permissions
 data "aws_iam_policy_document" "codepipeline_ecs" {
   statement {
@@ -315,6 +317,7 @@ resource "aws_iam_role_policy_attachment" "codepipeline_ecs" {
   role       = aws_iam_role.codepipeline_role.name
   policy_arn = aws_iam_policy.codepipeline_ecs.arn
 }
+
 // ECR Permissions
 data "aws_iam_policy_document" "codepipeline_ecr" {
   statement {
@@ -339,7 +342,25 @@ resource "aws_iam_role_policy_attachment" "codepipeline_ecr" {
   policy_arn = aws_iam_policy.codepipeline_ecr.arn
 }
 
+// Codestar connection
+data "aws_iam_policy_document" "codestar_connection" {
+  statement {
+    effect    = "Allow"
+    actions   = ["codestar-connections:UseConnection"]
+    resources = [aws_codestarconnections_connection.github_connection.arn]
+  }
+}
 
+resource "aws_iam_policy" "codestar_connection" {
+  name        = "${var.application_name}-codepipeline-codestar"
+  description = "Allow codepipeline manage CodeStar Connections"
+  policy      = data.aws_iam_policy_document.codestar_connection.json
+}
+
+resource "aws_iam_role_policy_attachment" "codestar_connection" {
+  role       = aws_iam_role.codepipeline_role.name
+  policy_arn = aws_iam_policy.codestar_connection.arn
+}
 
 
 

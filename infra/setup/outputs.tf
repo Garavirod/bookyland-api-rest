@@ -8,3 +8,8 @@ output "ssm_databse_password_name" {
   description = "The name of database password parameter store"
   value       = aws_ssm_parameter.database_user_password.name
 }
+
+
+output "aws_account_id" {
+  value = data.aws_caller_identity.current.account_id
+}
