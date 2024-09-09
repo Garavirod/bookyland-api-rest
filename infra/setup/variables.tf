@@ -19,6 +19,8 @@ variable "tf_state_lock_table" {
   default     = "devops-tf-lock-bookyland"
 }
 
+data "aws_caller_identity" "current" {}
+
 // Github
 variable "github_user_name" {
   description = "Github Username"
@@ -34,3 +36,4 @@ variable "github_repository_name" {
   description = "Github repository project"
   default     = "bookyland-api-rest"
 }
+

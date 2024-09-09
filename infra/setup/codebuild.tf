@@ -36,6 +36,11 @@ resource "aws_codebuild_project" "deploy_dev" {
       name  = "SSM_PARAM_DB_PASSWORD_NAME"
       value = aws_ssm_parameter.database_user_password.name
     }
+
+    environment_variable {
+      name  = "AWS_ACCOUNT_ID"
+      value = data.aws_caller_identity.current.account_id
+    }
   }
 
   source {

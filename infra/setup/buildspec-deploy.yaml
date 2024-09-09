@@ -13,7 +13,7 @@ phases:
     commands:
       # Build Docker image
       - echo Building Docker image...
-      - docker-compose -f docker-compose.yml build api
+      - docker compose -f docker-compose.yml build api
 
   post_build:
     commands:
@@ -25,9 +25,9 @@ phases:
       # Initialize and apply Terraform
       - echo Initializing and applying Terraform...
       - cd infra/
-      - docker-compose run --rm terraform -chdir=deploy init
+      - docker compose run --rm terraform -chdir=deploy init
       - docker compose run --rm terraform -chdir=deploy/ workspace select -or-create $TF_WORKSPACE
-      - docker-compose run --rm terraform -chdir=deploy apply -auto-approve
+      - docker compose run --rm terraform -chdir=deploy apply -auto-approve
 
       # Done
       - echo "Terraform deployment completed for environment $TF_WORKSPACE."
