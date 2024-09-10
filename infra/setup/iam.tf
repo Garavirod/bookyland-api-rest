@@ -215,7 +215,10 @@ data "aws_iam_policy_document" "codebuild_parameter_store" {
     actions = [
       "ssm:GetParameter",
     ]
-    resources = [aws_ssm_parameter.database_user_password.arn]
+    resources = [
+      aws_ssm_parameter.database_user_password.arn,
+      aws_ssm_parameter.dockerhub_token.arn
+    ]
   }
 }
 resource "aws_iam_policy" "codebuild_parameter_store" {
