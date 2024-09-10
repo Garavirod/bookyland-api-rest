@@ -35,7 +35,7 @@ phases:
 
       # Initialize and apply Terraform
       - echo Initializing and applying Terraform...
-      - cd infra/deploy
+      - cd infra/
       # - docker-compose -f docker-compose.yaml run --rm terraform -chdir=deploy init # Ensure the correct path to the docker-compose.yaml
       # - docker-compose -f docker-compose.yaml run --rm terraform -chdir=deploy workspace select $TF_WORKSPACE || docker-compose -f docker-compose.yaml run --rm terraform workspace new $TF_WORKSPACE
       # - docker-compose -f docker-compose.yaml run --rm terraform -chdir=deploy apply -auto-approve
