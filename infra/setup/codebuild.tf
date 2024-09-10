@@ -18,6 +18,11 @@ resource "aws_codebuild_project" "deploy_dev" {
     privileged_mode = true
 
     environment_variable {
+      name  = "DOCKERHUB_USER"
+      value = "garavirod"
+    }
+
+    environment_variable {
       name  = "TF_WORKSPACE"
       value = "$CODEBUILD_WEBHOOK_TRIGGER"
     }
@@ -35,6 +40,10 @@ resource "aws_codebuild_project" "deploy_dev" {
     environment_variable {
       name  = "SSM_PARAM_DB_PASSWORD_NAME"
       value = aws_ssm_parameter.database_user_password.name
+    }
+    environment_variable {
+      name  = "SSM_PARAM_DOCKERHUB_TOKEN_NAME"
+      value = aws_ssm_parameter.dockerhub_token.name
     }
 
     environment_variable {

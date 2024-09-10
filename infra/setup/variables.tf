@@ -37,3 +37,7 @@ variable "github_repository_name" {
   default     = "bookyland-api-rest"
 }
 
+// Docker Hub
+variable "dockerhub_token" {
+  description = "Docker Hub token for logging"
+}
