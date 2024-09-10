@@ -15,8 +15,7 @@ phases:
     commands:
       # Build Docker image
       - echo Building Docker image...
-      - cd
-      - docker build -t $ECR_URI:latest -f ./app/Dockerfile ./app
+      - docker compose -f ./docker-compose.yaml build api
       # Tag Docker image
       - docker tag $ECR_URI:latest $ECR_URI:$IMAGE_TAG
 
@@ -29,6 +28,7 @@ phases:
 
       # Initialize and apply Terraform
       - echo Initializing and applying Terraform...
+      - cd infra
       - docker compose -f deploy/docker-compose.yaml run --rm terraform init # Ensure the correct path to the docker-compose.yaml
       - docker compose -f deploy/docker-compose.yaml run --rm terraform workspace select $TF_WORKSPACE || docker compose -f deploy/docker-compose.yaml run --rm terraform workspace new $TF_WORKSPACE
       - docker compose -f deploy/docker-compose.yaml run --rm terraform apply -auto-approve
