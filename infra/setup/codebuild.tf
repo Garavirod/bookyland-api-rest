@@ -13,7 +13,7 @@ resource "aws_codebuild_project" "deploy_dev" {
 
   environment {
     compute_type    = "BUILD_GENERAL1_SMALL"
-    image           = "hashicorp/terraform:1.6.2"
+    image           = "aws/codebuild/standard:5.0"
     type            = "LINUX_CONTAINER"
     privileged_mode = true
 
@@ -40,6 +40,11 @@ resource "aws_codebuild_project" "deploy_dev" {
     environment_variable {
       name  = "AWS_ACCOUNT_ID"
       value = data.aws_caller_identity.current.account_id
+    }
+
+    environment_variable {
+      name  = "IMAGE_TAG"
+      value = "latest"
     }
   }
 

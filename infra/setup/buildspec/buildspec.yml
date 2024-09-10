@@ -15,14 +15,16 @@ phases:
     commands:
       # Build Docker image
       - echo Building Docker image...
-      - docker compose build api
+      - docker build -t $ECR_URI:latest .
+      # Tag Docker image
+      - docker tag $ECR_URI:latest $ECR_URI:$IMAGE_TAG
 
   post_build:
     commands:
       # Tag and push Docker image
-      - echo Tagging and pushing Docker image...
-      - docker tag bookyland-app:latest $ECR_URI/bookyland-app:latest
-      - docker push $ECR_URI/bookyland-app:latest
+      - echo Pushing Docker image...
+      - docker push $ECR_URI:latest
+      - docker push $ECR_URI:$IMAGE_TAG
 
       # Initialize and apply Terraform
       - echo Initializing and applying Terraform...
