@@ -33,12 +33,14 @@ phases:
       - docker push $ECR_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION
       - docker push $ECR_URI:latest
 
+      # Getting AWS Credentials
+      - echo "Getting AWS Credentials"
+      - export AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id)
+      - export AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)
+
       # Initialize and apply Terraform
       - echo Initializing and applying Terraform...
       - cd infra/
-      # - docker-compose -f docker-compose.yaml run --rm terraform -chdir=deploy init # Ensure the correct path to the docker-compose.yaml
-      # - docker-compose -f docker-compose.yaml run --rm terraform -chdir=deploy workspace select $TF_WORKSPACE || docker-compose -f docker-compose.yaml run --rm terraform workspace new $TF_WORKSPACE
-      # - docker-compose -f docker-compose.yaml run --rm terraform -chdir=deploy apply -auto-approve
       - docker-compose run --rm terraform -chdir=deploy/ init
       - docker-compose run --rm terraform -chdir=deploy/ workspace select -or-create $workspace
       - docker-compose run --rm terraform -chdir=deploy/ apply -auto-approve
