@@ -13,7 +13,7 @@ resource "aws_codebuild_project" "deploy_dev" {
 
   environment {
     compute_type    = "BUILD_GENERAL1_SMALL"
-    image           = "aws/codebuild/standard:5.0"
+    image           = "hashicorp/terraform:1.6.2"
     type            = "LINUX_CONTAINER"
     privileged_mode = true
 
