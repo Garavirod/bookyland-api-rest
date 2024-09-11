@@ -39,9 +39,9 @@ phases:
       - echo "Getting AWS Credentials"
       # Ensure AWS credentials are available via IAM role or environment
       - aws sts get-caller-identity  # Check if AWS credentials are available
-      - export AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id)
-      - export AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)
-      - export AWS_SESSION_TOKEN=$(aws configure get aws_session_token)
+      - export AWS_ACCESS_KEY_ID=$(aws sts get-caller-identity --query 'Credentials.AccessKeyId' --output text)
+      - export AWS_SECRET_ACCESS_KEY=$(aws sts get-caller-identity --query 'Credentials.SecretAccessKey' --output text)
+      - export AWS_SESSION_TOKEN=$(aws sts get-caller-identity --query 'Credentials.SessionToken' --output text)
 
       # Initialize and apply Terraform
       - echo Initializing and applying Terraform...
