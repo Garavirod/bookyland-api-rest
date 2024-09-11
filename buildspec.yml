@@ -53,7 +53,7 @@ phases:
           -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
           terraform -chdir=deploy/ apply -auto-approve
 
-    - echo "Terraform deployment completed for environment $TF_WORKSPACE."
+      - echo "Terraform deployment completed for environment $TF_WORKSPACE."
 
 cache:
   paths:
