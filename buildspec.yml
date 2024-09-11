@@ -3,6 +3,9 @@ version: 0.2
 phases:
   install:
     commands:
+      - echo Installing dependencies...
+      - apt-get update
+      - apt-get install -y jq wget unzip
       - echo Installing Terraform...
       - wget https://releases.hashicorp.com/terraform/1.6.2/terraform_1.6.2_linux_amd64.zip
       - unzip terraform_1.6.2_linux_amd64.zip
