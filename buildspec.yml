@@ -16,7 +16,7 @@ phases:
     commands:
       - echo Deploying into environment $TF_WORKSPACE
       # - echo Verifying S3 permissions for list and access
-      -#  aws s3 ls s3://devops-tf-state-bookyland
+      #  aws s3 ls s3://devops-tf-state-bookyland
 
       - echo "Logging in to Docker Hub..."
       - export DOCKERHUB_TOKEN=$(aws ssm get-parameter --name $SSM_PARAM_DOCKERHUB_TOKEN_NAME --with-decryption --query "Parameter.Value" --output text)
