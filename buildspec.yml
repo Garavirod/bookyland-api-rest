@@ -10,10 +10,10 @@ phases:
   pre_build:
     commands:
       - echo Deploying into environment $TF_WORKSPACE
-      - echo verifying s3 permissions for list and access
+      - echo Verifying S3 permissions for list and access
       - aws s3 ls s3://devops-tf-state-bookyland
 
-      - echo "Logging in Docker Hub..."
+      - echo "Logging in to Docker Hub..."
       - export DOCKERHUB_TOKEN=$(aws ssm get-parameter --name $SSM_PARAM_DOCKERHUB_TOKEN_NAME --with-decryption --query "Parameter.Value" --output text)
       - echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USER" --password-stdin
 
@@ -35,25 +35,17 @@ phases:
       - docker push $ECR_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION
       - docker push $ECR_URI:latest
 
+      - echo "AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID"
+      - echo "AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY"
+      - echo "AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN"
+
       - echo Initializing and applying Terraform...
       - cd infra/
-      - docker-compose run --rm \
-          -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-          -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-          -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-          terraform -chdir=deploy/ init
-      - docker-compose run --rm \
-          -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-          -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-          -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-          terraform -chdir=deploy/ workspace select -or-create $TF_WORKSPACE
-      - docker-compose run --rm \
-          -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-          -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-          -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-          terraform -chdir=deploy/ apply -auto-approve
+      - docker-compose run --rm terraform -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e TF_WORKSPACE=$TF_WORKSPACE terraform -chdir=deploy/ init
+      - docker-compose run --rm terraform -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e TF_WORKSPACE=$TF_WORKSPACE terraform -chdir=deploy/ workspace select -or-create $TF_WORKSPACE
+      - docker-compose run --rm terraform -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e TF_WORKSPACE=$TF_WORKSPACE terraform -chdir=deploy/ apply -auto-approve
 
-      - echo "Terraform deployment completed for environment $TF_WORKSPACE."
+    - echo "Terraform deployment completed for environment $TF_WORKSPACE."
 
 cache:
   paths:
