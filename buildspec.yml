@@ -5,6 +5,8 @@ phases:
     commands:
       # Show env deploying to
       - echo Deploying into environment $TF_WORKSPACE
+      - echo verifying s3 permissions for list and access
+      - aws s3 ls s3://devops-tf-state-bookyland
 
       # Docker Hub Login
       - echo "Logging in Docker Hub..."
