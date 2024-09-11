@@ -35,15 +35,12 @@ phases:
       - docker push $ECR_URI:$CODEBUILD_RESOLVED_SOURCE_VERSION
       - docker push $ECR_URI:latest
 
-      - echo $AWS_ACCESS_KEY_ID
-      - echo $AWS_SECRET_ACCESS_KEY
-      - echo $AWS_SESSION_TOKEN
-
       - echo Initializing and applying Terraform...
       - cd infra/
-      - docker-compose run --rm terraform -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e TF_WORKSPACE=$TF_WORKSPACE terraform -chdir=deploy/ init
-      - docker-compose run --rm terraform -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e TF_WORKSPACE=$TF_WORKSPACE terraform -chdir=deploy/ workspace select -or-create $TF_WORKSPACE
-      - docker-compose run --rm terraform -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e TF_WORKSPACE=$TF_WORKSPACE terraform -chdir=deploy/ apply -auto-approve
+      # Docker Compose to run Terraform with environment variables passed
+      - docker-compose run --rm -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e TF_WORKSPACE=$TF_WORKSPACE terraform -chdir=deploy/ init
+      - docker-compose run --rm -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e TF_WORKSPACE=$TF_WORKSPACE terraform -chdir=deploy/ workspace select -or-create $TF_WORKSPACE
+      - docker-compose run --rm -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -e TF_WORKSPACE=$TF_WORKSPACE terraform -chdir=deploy/ apply -auto-approve
 
       - echo "Terraform deployment completed for environment $TF_WORKSPACE."
 

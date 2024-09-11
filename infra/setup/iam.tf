@@ -366,4 +366,49 @@ resource "aws_iam_role_policy_attachment" "codestar_connection" {
 }
 
 
+# Allow access to retrieve session tokens from STS
+resource "aws_iam_policy" "codebuild_sts_policy" {
+  name = "codebuild_sts_policy"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "sts:GetSessionToken",
+          "sts:AssumeRole",
+          "sts:GetCallerIdentity"
+        ],
+        Effect   = "Allow",
+        Resource = "*"
+      }
+    ]
+  })
+}
 
+resource "aws_iam_role_policy_attachment" "codebuild_sts" {
+  role       = aws_iam_role.codepipeline_role.name
+  policy_arn = aws_iam_policy.codebuild_sts_policy.arn
+}
+
+# Allow access to EC2 metadata (if your environment requires it)
+resource "aws_iam_policy" "codebuild_ec2_metadata_policy" {
+  name = "codebuild_ec2_metadata_policy"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeRegions"
+        ],
+        Effect   = "Allow",
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "codebuild_ec2" {
+  role       = aws_iam_role.codepipeline_role.name
+  policy_arn = aws_iam_policy.codebuild_ec2_metadata_policy.arn
+}
