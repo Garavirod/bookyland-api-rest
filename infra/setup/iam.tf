@@ -136,10 +136,7 @@ data "aws_iam_policy_document" "s3" {
       "s3:PutObject",
       "s3:CreateBucket"
     ]
-    resources = [
-      aws_s3_bucket.s3_artifact.arn,
-      "${aws_s3_bucket.s3_artifact.arn}/*"
-    ]
+    resources = ["*"]
   }
 }
 resource "aws_iam_policy" "s3" {
