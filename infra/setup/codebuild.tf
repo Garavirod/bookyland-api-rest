@@ -22,10 +22,10 @@ resource "aws_codebuild_project" "deploy_dev" {
       value = "garavirod"
     }
 
-    environment_variable {
+    /* environment_variable {
       name  = "TF_WORKSPACE"
       value = "$TF_WORKSPACE"
-    }
+    } */
 
     environment_variable {
       name  = "ECR_URI"
