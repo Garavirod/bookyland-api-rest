@@ -14,10 +14,10 @@ phases:
 
   pre_build:
     commands:
-      - echo Deploying into environment $CODEBUILD_WEBHOOK_TRIGGER
       # - echo Verifying S3 permissions for list and access
       #  aws s3 ls s3://devops-tf-state-bookyland
-
+      - export TF_WORKSPACE=$(echo $CODEBUILD_WEBHOOK_TRIGGER | sed 's/branch\///')
+      - echo Deploying into environment $(echo $TF_WORKSPACE)
       - echo "Logging in to Docker Hub..."
       - export DOCKERHUB_TOKEN=$(aws ssm get-parameter --name $SSM_PARAM_DOCKERHUB_TOKEN_NAME --with-decryption --query "Parameter.Value" --output text)
       - echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USER" --password-stdin

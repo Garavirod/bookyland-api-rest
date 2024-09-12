@@ -24,7 +24,7 @@ resource "aws_codebuild_project" "deploy_dev" {
 
     environment_variable {
       name  = "TF_WORKSPACE"
-      value = "dev"
+      value = "$TF_WORKSPACE"
     }
 
     environment_variable {
