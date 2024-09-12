@@ -14,7 +14,7 @@ phases:
 
   pre_build:
     commands:
-      - echo Deploying into environment $TF_WORKSPACE
+      - echo Deploying into environment $CODEBUILD_WEBHOOK_TRIGGER
       # - echo Verifying S3 permissions for list and access
       #  aws s3 ls s3://devops-tf-state-bookyland
 
@@ -28,8 +28,6 @@ phases:
       - echo Getting SSM parameters
       - export TF_VAR_db_password=$(aws ssm get-parameter --name $SSM_PARAM_DB_PASSWORD_NAME --with-decryption --query "Parameter.Value" --output text)
 
-      - echo Unsetting TF_WORKSPACE to avoid conflict...
-      - unset TF_WORKSPACE
       - echo $AWS_ACCESS_KEY_ID
       - echo $AWS_SECRET_ACCESS_KEY
       - echo $AWS_SESSION_TOKEN
