@@ -49,7 +49,7 @@ phases:
       - echo Initializing and applying Terraform...
       - cd infra/
       - terraform -chdir=deploy/ init
-      - terraform -chdir=deploy/ workspace select -or-create $TF_WORKSPACE
+      - terraform -chdir=deploy/ workspace select $TF_WORKSPACE || terraform -chdir=deploy/ workspace new $TF_WORKSPACE
       - terraform -chdir=deploy/ apply -auto-approve
 
       - echo "Terraform deployment completed for environment $TF_WORKSPACE."
