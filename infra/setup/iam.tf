@@ -134,6 +134,7 @@ data "aws_iam_policy_document" "s3" {
       "s3:GetBucketVersioning",
       "s3:PutObjectAcl",
       "s3:PutObject",
+      "s3:CreateBucket"
     ]
     resources = [
       aws_s3_bucket.s3_artifact.arn,
@@ -141,15 +142,15 @@ data "aws_iam_policy_document" "s3" {
     ]
   }
 }
-resource "aws_iam_policy" "s3_artifacts" {
-  name        = "${var.application_name}-s3-artifacts"
-  description = "Allow CodeBuild to manage S3 artifacts"
+resource "aws_iam_policy" "s3" {
+  name        = "${var.application_name}-s3"
+  description = "Allow CodeBuild to manage S3"
   policy      = data.aws_iam_policy_document.s3.json
 }
 
-resource "aws_iam_role_policy_attachment" "s3_artifacts" {
+resource "aws_iam_role_policy_attachment" "s3" {
   role       = aws_iam_role.codebuild_role.name
-  policy_arn = aws_iam_policy.s3_artifacts.arn
+  policy_arn = aws_iam_policy.s3.arn
 }
 
 // CodeBuild doc policy logs 
@@ -230,6 +231,79 @@ resource "aws_iam_role_policy_attachment" "codebuild_parameter_store" {
   role       = aws_iam_role.codebuild_role.name
   policy_arn = aws_iam_policy.codebuild_parameter_store.arn
 }
+
+# Allow access to retrieve session tokens from STS
+resource "aws_iam_policy" "codebuild_sts" {
+  name = "${var.application_name}-codebuild-sts"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "sts:GetSessionToken",
+          "sts:AssumeRole",
+          "sts:GetCallerIdentity"
+        ],
+        Effect   = "Allow",
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "codebuild_sts" {
+  role       = aws_iam_role.codebuild_role.name
+  policy_arn = aws_iam_policy.codebuild_sts.arn
+}
+
+# Allow access to EC2 metadata (if your environment requires it)
+resource "aws_iam_policy" "codebuild_ec2" {
+  name = "${var.application_name}-codebuild-ec2-metadata"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeRegions"
+        ],
+        Effect   = "Allow",
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "codebuild_ec2" {
+  role       = aws_iam_role.codebuild_role.name
+  policy_arn = aws_iam_policy.codebuild_ec2.arn
+}
+
+// Dynamo backend
+resource "aws_iam_policy" "codebuild_dynamodb_backend" {
+  name = "${var.application_name}-dynamodb-backend"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "dynamodb:DescribeTable",
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:DeleteItem"
+        ],
+        Effect   = "Allow",
+        Resource = "arn:aws:dynamodb:*:*:table/${var.tf_state_lock_table}"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "codebuild_dynamodb_backend" {
+  role       = aws_iam_role.codebuild_role.name
+  policy_arn = aws_iam_policy.codebuild_dynamodb_backend.arn
+}
+
 
 #########################################
 # CodePipeline role and iam permissions #
@@ -363,77 +437,4 @@ resource "aws_iam_policy" "codestar_connection" {
 resource "aws_iam_role_policy_attachment" "codestar_connection" {
   role       = aws_iam_role.codepipeline_role.name
   policy_arn = aws_iam_policy.codestar_connection.arn
-}
-
-
-# Allow access to retrieve session tokens from STS
-resource "aws_iam_policy" "codebuild_sts_policy" {
-  name = "codebuild_sts_policy"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = [
-          "sts:GetSessionToken",
-          "sts:AssumeRole",
-          "sts:GetCallerIdentity"
-        ],
-        Effect   = "Allow",
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "codebuild_sts" {
-  role       = aws_iam_role.codepipeline_role.name
-  policy_arn = aws_iam_policy.codebuild_sts_policy.arn
-}
-
-# Allow access to EC2 metadata (if your environment requires it)
-resource "aws_iam_policy" "codebuild_ec2_metadata_policy" {
-  name = "codebuild_ec2_metadata_policy"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = [
-          "ec2:DescribeInstances",
-          "ec2:DescribeRegions"
-        ],
-        Effect   = "Allow",
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "codebuild_ec2" {
-  role       = aws_iam_role.codepipeline_role.name
-  policy_arn = aws_iam_policy.codebuild_ec2_metadata_policy.arn
-}
-
-// Dynamo backend
-resource "aws_iam_policy" "codebuild_dynamodb_backend" {
-  name = "${var.application_name}-dynamodb-backend"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = [
-          "dynamodb:DescribeTable",
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:DeleteItem"
-        ],
-        Effect   = "Allow",
-        Resource = "arn:aws:dynamodb:*:*:table/${var.tf_state_lock_table}"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "codebuild_dynamodb_backend" {
-  role       = aws_iam_role.codebuild_role.name
-  policy_arn = aws_iam_policy.codebuild_dynamodb_backend.arn
 }
