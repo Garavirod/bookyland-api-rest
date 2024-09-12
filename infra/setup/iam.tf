@@ -412,3 +412,28 @@ resource "aws_iam_role_policy_attachment" "codebuild_ec2" {
   role       = aws_iam_role.codepipeline_role.name
   policy_arn = aws_iam_policy.codebuild_ec2_metadata_policy.arn
 }
+
+// Dynamo backend
+resource "aws_iam_policy" "codebuild_dynamodb_backend" {
+  name = "${var.application_name}-dynamodb-backend"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "dynamodb:DescribeTable",
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:DeleteItem"
+        ],
+        Effect   = "Allow",
+        Resource = "arn:aws:dynamodb:*:*:table/${var.tf_state_lock_table}"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "codebuild_dynamodb_backend" {
+  role       = aws_iam_role.codebuild_role.name
+  policy_arn = aws_iam_policy.codebuild_dynamodb_backend.arn
+}
