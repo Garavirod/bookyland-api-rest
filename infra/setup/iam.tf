@@ -52,7 +52,7 @@ resource "aws_iam_policy" "tf_backend" {
 }
 
 resource "aws_iam_role_policy_attachment" "tf_backend" {
-  role       = aws_iam_role.codebuild_role.id
+  role       = aws_iam_role.codebuild_role.name
   policy_arn = aws_iam_policy.tf_backend.arn
 }
 
