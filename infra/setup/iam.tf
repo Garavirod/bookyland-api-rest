@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "tf_backend" {
 
   statement {
     effect  = "Allow"
-    actions = ["s3:GetObject", "s3:PutObject", "S3:DeleteObject"]
+    actions = ["s3:GetObject", "s3:PutObject", "S3:DeleteObject", "s3:CreateBucket"]
     resources = [
       "arn:aws:s3:::${var.tf_state_bucket}/tf-state-deploy/*",
       "arn:aws:s3:::${var.tf_state_bucket}/tf-state-deploy-env/*"
@@ -133,8 +133,7 @@ data "aws_iam_policy_document" "s3" {
       "s3:GetObjectVersion",
       "s3:GetBucketVersioning",
       "s3:PutObjectAcl",
-      "s3:PutObject",
-      "s3:CreateBucket"
+      "s3:PutObject"
     ]
     resources = ["*"]
   }
