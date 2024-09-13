@@ -63,10 +63,9 @@ resource "aws_iam_role_policy" "codebuild_ecr" {
       {
         Effect = "Allow"
         Resource = [
-          "*"
+          aws_ecr_repository.app.arn
         ]
         Action = [
-          "ecr:GetAuthorizationToken",
           "ecr:CompleteLayerUpload",
           "ecr:UploadLayerPart",
           "ecr:InitiateLayerUpload",
@@ -75,6 +74,15 @@ resource "aws_iam_role_policy" "codebuild_ecr" {
           "ecr:BatchCheckLayerAvailability",
           "ecr:ListImages",
           "ecr:DescribeRepositories"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Resource = [
+          "*"
+        ]
+        Action = [
+          "ecr:GetAuthorizationToken"
         ]
       }
     ]
@@ -201,31 +209,73 @@ resource "aws_iam_role_policy" "codebuild_sts" {
   })
 }
 
-# Allow access to EC2 metadata
+# Allow access to EC2 
 resource "aws_iam_role_policy" "codebuild_ec2" {
   role = aws_iam_role.codebuild_role.name
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
-      {
+      { // Metadata
         Action = [
           "ec2:DescribeInstances",
           "ec2:DescribeRegions"
         ],
         Effect   = "Allow",
         Resource = "*"
+      },
+      { // Networking
+        Effect   = "Allow"
+        Resource = "*"
+        Action = [
+          "ec2:DescribeVpcs",
+          "ec2:CreateTags",
+          "ec2:CreateVpc",
+          "ec2:DeleteVpc",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DeleteSubnet",
+          "ec2:DeleteSecurityGroup",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DetachInternetGateway",
+          "ec2:DescribeInternetGateways",
+          "ec2:DeleteInternetGateway",
+          "ec2:DetachNetworkInterface",
+          "ec2:DescribeVpcEndpoints",
+          "ec2:DescribeRouteTables",
+          "ec2:DeleteRouteTable",
+          "ec2:DeleteVpcEndpoints",
+          "ec2:DisassociateRouteTable",
+          "ec2:DeleteRoute",
+          "ec2:DescribePrefixLists",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeVpcAttribute",
+          "ec2:DescribeNetworkAcls",
+          "ec2:AssociateRouteTable",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress",
+          "ec2:CreateSecurityGroup",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:CreateVpcEndpoint",
+          "ec2:ModifySubnetAttribute",
+          "ec2:CreateSubnet",
+          "ec2:CreateRoute",
+          "ec2:CreateRouteTable",
+          "ec2:CreateInternetGateway",
+          "ec2:AttachInternetGateway",
+          "ec2:ModifyVpcAttribute",
+          "ec2:RevokeSecurityGroupIngress",
+        ]
       }
     ]
   })
 }
 
 // S3 artifacts
-resource "aws_iam_role_policy" "codebuild_s3_artifacts" {
+resource "aws_iam_role_policy" "codebuild_s3" {
   role = aws_iam_role.codebuild_role.name
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      {
+      { // For artifacts
         Effect = "Allow"
         Resource = [
           "arn:aws:s3:::${aws_s3_bucket.s3_artifact.bucket}",
@@ -233,33 +283,15 @@ resource "aws_iam_role_policy" "codebuild_s3_artifacts" {
         ]
         Action = [
           "s3:ListBucket",
-          "s3:GetObject"
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
         ]
       }
-    ]
-  })
-}
 
-// Dynamo
-/* resource "aws_iam_role_policy" "codebuild_dynamodb" {
-  role = aws_iam_role.codebuild_role.name
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = [
-          "dynamodb:DescribeTable",
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:DeleteItem"
-        ],
-        Effect   = "Allow",
-        Resource = "arn:aws:dynamodb:*:*:table/${var.tf_state_lock_table}"
-      }
     ]
   })
 }
- */
 
 #########################################
 # CodePipeline role and iam permissions #
