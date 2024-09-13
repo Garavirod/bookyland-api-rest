@@ -216,6 +216,27 @@ resource "aws_iam_role_policy" "codebuild_ec2" {
   })
 }
 
+// S3 artifacts
+resource "aws_iam_role_policy" "codebuild_s3_artifacts" {
+  role = aws_iam_role.codebuild_role.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:s3:::${aws_s3_bucket.s3_artifact.bucket}",
+          "arn:aws:s3:::${aws_s3_bucket.s3_artifact.bucket}/*"
+        ]
+        Action = [
+          "s3:ListBucket",
+          "s3:GetObject"
+        ]
+      }
+    ]
+  })
+}
+
 // Dynamo
 /* resource "aws_iam_role_policy" "codebuild_dynamodb" {
   role = aws_iam_role.codebuild_role.name
@@ -256,7 +277,7 @@ resource "aws_iam_role" "codepipeline_role" {
 }
 
 //  S3 policy doc for artifacts 
-resource "aws_iam_role_policy" "codebuild_s3_artifacts" {
+resource "aws_iam_role_policy" "codepipeline_s3_artifacts" {
   role = aws_iam_role.codepipeline_role.name
   policy = jsonencode({
     Version = "2012-10-17"
