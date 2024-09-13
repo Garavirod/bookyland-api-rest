@@ -288,7 +288,7 @@ resource "aws_iam_role_policy" "codepipeline_exec" {
       {
         Effect = "Allow"
         Resource = [
-          aws_codepipeline.deploy.arn
+          aws_codepipeline.deploy.arn,
         ]
         Action = [
           "codepipeline:StartPipelineExecution",
@@ -299,6 +299,12 @@ resource "aws_iam_role_policy" "codepipeline_exec" {
           "codepipeline:ListPipelineExecutions",
           "codepipeline:ListPipelineExecutions",
           "codepipeline:ListPipelineExecutionHistory",
+        ]
+      },
+      {
+        Effect   = "Allow"
+        Resource = [aws_codebuild_project.deploy_dev.arn]
+        Action = [
           "codebuild:BatchGetBuilds",
           "codebuild:StartBuild",
           "codebuild:BatchGetProjects",
