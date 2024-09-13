@@ -63,8 +63,7 @@ resource "aws_iam_role_policy" "codebuild_ecr" {
       {
         Effect = "Allow"
         Resource = [
-          aws_ecr_repository.app.arn,
-          aws_codebuild_project.deploy_dev.arn
+          "*"
         ]
         Action = [
           "ecr:GetAuthorizationToken",
