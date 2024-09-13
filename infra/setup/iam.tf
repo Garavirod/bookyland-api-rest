@@ -71,7 +71,10 @@ resource "aws_iam_role_policy" "codebuild_ecr" {
           "ecr:UploadLayerPart",
           "ecr:InitiateLayerUpload",
           "ecr:BatchCheckLayerAvailability",
-          "ecr:PutImage"
+          "ecr:PutImage",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:ListImages",
+          "ecr:DescribeRepositories"
         ]
       }
     ]
