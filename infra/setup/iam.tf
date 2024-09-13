@@ -135,7 +135,8 @@ data "aws_iam_policy_document" "s3" {
       "s3:PutObject",
       "s3:GetObject",
       "s3:ListBucket",
-      "s3:GetBucketPolicy"
+      "s3:GetBucketPolicy",
+      "s3:GetBucketAcl"
     ]
     resources = [
       /* "arn:aws:s3:::${aws_s3_bucket.s3_artifact.bucket}",
