@@ -137,8 +137,9 @@ data "aws_iam_policy_document" "s3" {
       "s3:ListBucket"
     ]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.s3_artifact.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.s3_artifact.bucket}/*"
+      /* "arn:aws:s3:::${aws_s3_bucket.s3_artifact.bucket}",
+      "arn:aws:s3:::${aws_s3_bucket.s3_artifact.bucket}/*" */
+      "*"
     ]
   }
 }
