@@ -139,7 +139,8 @@ data "aws_iam_policy_document" "s3" {
       "s3:GetBucketAcl",
       "s3:GetBucketCORS",
       "s3:GetBucketWebsite",
-      "s3:GetBucketVersioning"
+      "s3:GetBucketVersioning",
+      "s3:GetBucketTagging"
     ]
     resources = [
       /* "arn:aws:s3:::${aws_s3_bucket.s3_artifact.bucket}",
