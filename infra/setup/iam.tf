@@ -129,13 +129,17 @@ data "aws_iam_policy_document" "s3" {
   statement {
     effect = "Allow"
     actions = [
+      "s3:CreateBucket",
+      "s3:PutBucketVersioning",
+      "s3:PutBucketPublicAccessBlock",
+      "s3:PutObject",
       "s3:GetObject",
-      "s3:GetObjectVersion",
-      "s3:GetBucketVersioning",
-      "s3:PutObjectAcl",
-      "s3:PutObject"
+      "s3:ListBucket"
     ]
-    resources = ["*"]
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.s3_artifact.bucket}",
+      "arn:aws:s3:::${aws_s3_bucket.s3_artifact.bucket}/*"
+    ]
   }
 }
 resource "aws_iam_policy" "s3" {
