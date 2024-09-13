@@ -8,9 +8,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     image: ${ECR_URI}
     environment:
-      DATABASE_HOST: mysql
+      DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_PORT: 3306
       DATABASE_NAME: ${DATABASE_NAME}
       DATABASE_USER : ${DATABASE_USER}
@@ -22,6 +24,8 @@ services:
   mysql:
     image: mysql:8
     container_name: mysql
+    env_file:
+      - .env
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE_NAME}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
