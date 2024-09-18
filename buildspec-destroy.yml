@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+      - apt-get update
+      - apt-get install -y wget unzip
+      - echo Installing Terraform...
+      - wget https://releases.hashicorp.com/terraform/1.6.2/terraform_1.6.2_linux_amd64.zip
+      - unzip terraform_1.6.2_linux_amd64.zip
+      - mv terraform /usr/local/bin/
+      - terraform --version  # Verifying the installation
+
+  build:
+    commands:
+      - echo "Initializing Terraform and selecting workspace..."
+      - cd infra/
+      - terraform -chdir=deploy/ init
+      - terraform -chdir=deploy/ workspace select $WORKSPACE
+
+      - echo "Destroying Terraform-managed infrastructure..."
+      - terraform -chdir=deploy/ destroy -auto-approve
+
+  post_build:
+    commands:
+      - echo "Terraform destroy process completed for workspace $WORKSPACE"

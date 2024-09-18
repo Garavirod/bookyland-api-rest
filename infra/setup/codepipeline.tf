@@ -6,7 +6,7 @@
 resource "aws_codepipeline" "deploy" {
 
   name     = "${var.application_name}-codepipeline"
-  role_arn = aws_iam_role.codepipeline_role.arn
+  role_arn = aws_iam_role.codepipeline_deploy_role.arn
 
   # Dev 
   stage {
@@ -39,7 +39,7 @@ resource "aws_codepipeline" "deploy" {
       output_artifacts = ["build_output_dev"]
 
       configuration = {
-        ProjectName = aws_codebuild_project.deploy_dev.name
+        ProjectName = aws_codebuild_project.deploy_infra.name
       }
     }
   }
@@ -50,32 +50,14 @@ resource "aws_codepipeline" "deploy" {
 }
 
 // For terraform destroy
-/* resource "aws_codepipeline" "destroy" {
-  name     = "${var.application_name}-codepipeline-destroy"
-  role_arn = aws_iam_role.codepipeline_role.arn
+resource "aws_codepipeline" "destroy_pipeline" {
+  name     = "${var.application_name}-destroy-pipeline"
+  role_arn = aws_iam_role.codebuild_destroy_role.arn
 
   stage {
-    name = "Source_Destroy"
+    name = "Manual_Approval"
     action {
-      name             = "Source_Destroy"
-      category         = "Source"
-      owner            = "AWS"
-      provider         = "CodeStarSourceConnection"
-      version          = "1"
-      output_artifacts = ["source_destroy_dev"]
-
-      configuration = {
-        ConnectionArn    = aws_codestarconnections_connection.github_connection.arn
-        FullRepositoryId = "${var.github_user_name}/${var.github_repository_name}"
-        BranchName       = "dev"
-      }
-    }
-  }
-
-  stage {
-    name = "Approval_Destroy"
-    action {
-      name     = "Approval_Destroy"
+      name     = "ManualApproval"
       category = "Approval"
       owner    = "AWS"
       provider = "Manual"
@@ -86,20 +68,23 @@ resource "aws_codepipeline" "deploy" {
   stage {
     name = "Destroy"
     action {
-      name            = "DestoryTerraformDeployment"
-      category        = "Build"
-      owner           = "AWS"
-      provider        = "CodeBuild"
-      version         = "1"
-      input_artifacts = ["source_destroy_dev"]
+      name             = "Destroy_Action"
+      category         = "Build"
+      owner            = "AWS"
+      provider         = "CodeBuild"
+      version          = "1"
+      input_artifacts  = []
+      output_artifacts = []
+
       configuration = {
-        ProjectName = aws_codebuild_project.destroy_dev.name
+        ProjectName = aws_codebuild_project.destroy_infra.name
       }
     }
   }
+
   artifact_store {
     type     = "S3"
     location = aws_s3_bucket.s3_artifact.bucket
   }
-} */
+}
 
