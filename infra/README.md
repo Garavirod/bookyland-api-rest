@@ -89,3 +89,14 @@ The integration of these components ensures that code changes are automatically 
 * **S3 Artifact Bucket**: Used to temporarily store these artifacts between pipeline stages.
 
 So, the S3 bucket does indeed store artifacts related to your pipeline stages, including your source code initially, and potentially build outputs if they are configured to be stored.
+
+### Destroy terraform infra manually.
+
+An approach is to use a **manual trigger on a specific branch** in your GitHub (or another repository). You can create a separate branch (like `destroy-manual-trigger`) that you rarely or never update, ensuring the pipeline is triggered only when you manually push something to it. Then, just initiate the destruction process manually by pushing an empty commit to this branch.
+
+This still uses a real source, but you control when it triggers by pushing empty commits:
+
+```
+git commit --allow-empty -m "Trigger destroy pipeline"
+git push origin destroy-manual-trigger
+```
