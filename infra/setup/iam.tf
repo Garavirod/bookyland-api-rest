@@ -494,16 +494,27 @@ resource "aws_iam_role_policy_attachment" "codepipeline_destroy_exe" {
 
 
 /* Codestar role permissions */
-resource "aws_iam_role_policy" "codepipeline_codestar_connection" {
-  role = aws_iam_role.codepipeline_deploy_role.name
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Resource = [aws_codestarconnections_connection.github_connection.arn]
-        Action   = ["codestar-connections:UseConnection"]
-      }
-    ]
-  })
+data "aws_iam_policy_document" "codepipeline_codestar_connection_policy_doc" {
+  version = "2012-10-17"
+  statement {
+    effect    = "Allow"
+    actions   = ["codestar-connections:UseConnection"]
+    resources = [aws_codestarconnections_connection.github_connection.arn]
+  }
+}
+
+resource "aws_iam_policy" "codepipeline_codestar_connection_policy" {
+  name        = "${var.application_name}-codestar-connection-policy"
+  description = "Allow codepipeline codestar connections"
+  policy      = data.aws_iam_policy_document.codepipeline_codestar_connection_policy_doc.json
+}
+
+resource "aws_iam_role_policy_attachment" "codepipeline_codestar_connection_deploy" {
+  role       = aws_iam_role.codepipeline_deploy_role.name
+  policy_arn = aws_iam_policy.codepipeline_codestar_connection_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "codepipeline_codestar_connection_destroy" {
+  role       = aws_iam_role.codepipeline_destroy_role.name
+  policy_arn = aws_iam_policy.codepipeline_codestar_connection_policy.arn
 }
