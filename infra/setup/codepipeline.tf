@@ -52,16 +52,22 @@ resource "aws_codepipeline" "deploy" {
 // For terraform destroy
 resource "aws_codepipeline" "destroy_pipeline" {
   name     = "${var.application_name}-destroy-pipeline"
-  role_arn = aws_iam_role.codebuild_destroy_role.arn
+  role_arn = aws_iam_role.codepipeline_destroy_role.arn
 
   stage {
-    name = "Manual_Approval"
+    name = "Source_Destroy"
     action {
-      name     = "ManualApproval"
-      category = "Approval"
-      owner    = "AWS"
-      provider = "Manual"
-      version  = "1"
+      name             = "Source_Dev"
+      category         = "Source"
+      owner            = "AWS"
+      provider         = "CodeStarSourceConnection"
+      version          = "1"
+      output_artifacts = ["source_output_destroy"]
+      configuration = {
+        ConnectionArn    = aws_codestarconnections_connection.github_connection.arn
+        FullRepositoryId = "${var.github_user_name}/${var.github_repository_name}"
+        BranchName       = "destroy-manual-trigger"
+      }
     }
   }
 
@@ -73,7 +79,7 @@ resource "aws_codepipeline" "destroy_pipeline" {
       owner            = "AWS"
       provider         = "CodeBuild"
       version          = "1"
-      input_artifacts  = []
+      input_artifacts  = ["source_output_destroy"]
       output_artifacts = []
 
       configuration = {

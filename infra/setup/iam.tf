@@ -320,7 +320,7 @@ data "aws_iam_policy_document" "codebuild_ec2_policy_doc" {
   }
 }
 resource "aws_iam_policy" "codebuild_ec2_policy" {
-  name        = "${var.application_name}-codebuild-sts"
+  name        = "${var.application_name}-codebuild-ec2"
   description = "Allow Codebuild EC2 management"
   policy      = data.aws_iam_policy_document.codebuild_ec2_policy_doc.json
 }
@@ -374,7 +374,7 @@ resource "aws_iam_role_policy_attachment" "codebuild_destroy_s3_artifact" {
 #########################################
 // Deploy role
 resource "aws_iam_role" "codepipeline_deploy_role" {
-  name = "${var.application_name}-codepipeline-role"
+  name = "${var.application_name}-codepipeline-deploy-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -462,7 +462,7 @@ data "aws_iam_policy_document" "codepipeline_policy_exe_doc" {
     ]
   }
   statement {
-    effect    = "Allow"
+    effect = "Allow"
     resources = [
       aws_codebuild_project.deploy_infra.arn,
       aws_codebuild_project.destroy_infra.arn
