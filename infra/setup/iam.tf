@@ -160,6 +160,127 @@ resource "aws_iam_role_policy_attachment" "codebuild_destroy_ecs" {
   policy_arn = aws_iam_policy.codebuild_ecs_policy.arn
 }
 
+/* RDS  */
+/* CodeBuild doc policy RDS */
+data "aws_iam_policy_document" "codebuild_rds_policy_doc" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "rds:AddTagsToResource",
+      "rds:DescribeDBSubnetGroups",
+      "rds:DescribeDBInstances",
+      "rds:CreateDBSubnetGroup",
+      "rds:DeleteDBSubnetGroup",
+      "rds:CreateDBInstance",
+      "rds:DeleteDBInstance",
+      "rds:ListTagsForResource",
+      "rds:ModifyDBInstance"
+    ]
+    resources = ["*"]
+  }
+}
+/* CodeBuild RDS policy */
+resource "aws_iam_policy" "codebuild_rds_policy" {
+  name        = "${var.application_name}-codebuild-rds"
+  description = "Allow to manage RDS resources."
+  policy      = data.aws_iam_policy_document.codebuild_rds_policy_doc.json
+}
+/* Codebuild role atachment */
+resource "aws_iam_role_policy_attachment" "codebuild_rds_deploy" {
+  role       = aws_iam_role.codebuild_deploy_role.name
+  policy_arn = aws_iam_policy.codebuild_rds_policy.arn
+}
+resource "aws_iam_role_policy_attachment" "codebuild_rds_destroy" {
+  role       = aws_iam_role.codebuild_destroy_role.name
+  policy_arn = aws_iam_policy.codebuild_rds_policy.arn
+}
+
+/* IAM */
+/* Codebuild doc policy IAM */
+data "aws_iam_policy_document" "codebuild_iam_policy_doc" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "iam:ListInstanceProfilesForRole",
+      "iam:ListAttachedRolePolicies",
+      "iam:DeleteRole",
+      "iam:ListPolicyVersions",
+      "iam:DeletePolicy",
+      "iam:DetachRolePolicy",
+      "iam:ListRolePolicies",
+      "iam:GetRole",
+      "iam:GetPolicyVersion",
+      "iam:GetPolicy",
+      "iam:CreateRole",
+      "iam:CreatePolicy",
+      "iam:AttachRolePolicy",
+      "iam:TagRole",
+      "iam:TagPolicy",
+      "iam:PassRole"
+    ]
+    resources = ["*"]
+  }
+}
+/* CodeBuild IAM permissions policy */
+resource "aws_iam_policy" "codebuild_iam_policy" {
+  name        = "${var.application_name}-codebuild-iam"
+  description = "Allow to manage IAM resources."
+  policy      = data.aws_iam_policy_document.codebuild_iam_policy_doc.json
+}
+/* Codebuild role atachment */
+resource "aws_iam_role_policy_attachment" "codebuild_iam_deploy" {
+  role       = aws_iam_role.codebuild_deploy_role.name
+  policy_arn = aws_iam_policy.codebuild_iam_policy.arn
+}
+resource "aws_iam_role_policy_attachment" "codebuild_iam_destroy" {
+  role       = aws_iam_role.codebuild_destroy_role.name
+  policy_arn = aws_iam_policy.codebuild_iam_policy.arn
+}
+
+/* ELB */
+/* Codebuild ELB policy document */
+data "aws_iam_policy_document" "codebuild_elb_policy_doc" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "elasticloadbalancing:DeleteLoadBalancer",
+      "elasticloadbalancing:DeleteTargetGroup",
+      "elasticloadbalancing:DeleteListener",
+      "elasticloadbalancing:DescribeListeners",
+      "elasticloadbalancing:DescribeLoadBalancerAttributes",
+      "elasticloadbalancing:DescribeTargetGroups",
+      "elasticloadbalancing:DescribeTargetGroupAttributes",
+      "elasticloadbalancing:DescribeLoadBalancers",
+      "elasticloadbalancing:CreateListener",
+      "elasticloadbalancing:SetSecurityGroups",
+      "elasticloadbalancing:ModifyLoadBalancerAttributes",
+      "elasticloadbalancing:CreateLoadBalancer",
+      "elasticloadbalancing:ModifyTargetGroupAttributes",
+      "elasticloadbalancing:CreateTargetGroup",
+      "elasticloadbalancing:AddTags",
+      "elasticloadbalancing:DescribeTags",
+      "elasticloadbalancing:ModifyListener"
+    ]
+    resources = ["*"]
+  }
+}
+/* Policy */
+resource "aws_iam_policy" "codebuild_elb_policy" {
+  name        = "${var.application_name}-codebuild-elb"
+  description = "Allow to manage ELB resources."
+  policy      = data.aws_iam_policy_document.codebuild_elb_policy_doc.json
+}
+/* Codebuild role atachment */
+resource "aws_iam_role_policy_attachment" "codebuild_elb_deploy" {
+  role       = aws_iam_role.codebuild_deploy_role.name
+  policy_arn = aws_iam_policy.codebuild_elb_policy.arn
+}
+resource "aws_iam_role_policy_attachment" "codebuild_elb_destroy" {
+  role       = aws_iam_role.codebuild_destroy_role.name
+  policy_arn = aws_iam_policy.codebuild_elb_policy.arn
+}
+
+/* CloudWatch Logs */
 /* CodeBuild doc policy logs  */
 data "aws_iam_policy_document" "codebuild_log_policy_doc" {
   version = "2012-10-17"
@@ -168,7 +289,11 @@ data "aws_iam_policy_document" "codebuild_log_policy_doc" {
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
-      "logs:PutLogEvents"
+      "logs:PutLogEvents",
+      "logs:DeleteLogGroup",
+      "logs:DescribeLogGroups",
+      "logs:TagResource",
+      "logs:ListTagsLogGroup"
     ]
     resources = ["*"]
   }
