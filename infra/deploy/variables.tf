@@ -23,18 +23,3 @@ variable "prefix" {
   description = "Prefix for resources in AWS"
   default     = "bookyland"
 }
-
-// RDS
-variable "db_password" {
-  description = "Passowrd for the Terraform databse"
-}
-
-variable "db_username" {
-  description = "Database Username"
-  default     = "bookyland_user"
-}
-
-// ECR
-variable "ecr_app_image" {
-  description = "Path to the ECR repo with the API image"
-}
