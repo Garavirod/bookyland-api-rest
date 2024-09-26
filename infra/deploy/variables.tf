@@ -33,3 +33,8 @@ variable "db_username" {
   description = "Database Username"
   default     = "bookyland_user"
 }
+
+// ECR
+variable "ecr_app_image" {
+  description = "Path to the ECR repo with the API image"
+}
