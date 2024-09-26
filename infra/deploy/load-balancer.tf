@@ -11,21 +11,21 @@ resource "aws_security_group" "lb" {
   // Rules
   ingress {
     protocol    = "tcp"
-    from_port   = 80
+    from_port   = 80 // For http
     to_port     = 80
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     protocol    = "tcp"
-    from_port   = 443
+    from_port   = 443 // For https
     to_port     = 443
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
     protocol    = "tcp"
-    from_port   = 8000
+    from_port   = 8000 // por where app is running
     to_port     = 8000
     cidr_blocks = ["0.0.0.0/0"]
   }

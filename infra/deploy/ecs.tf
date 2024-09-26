@@ -106,3 +106,70 @@ resource "aws_ecs_task_definition" "api" {
     cpu_architecture        = "X86_64" //important to keep in mind, because this is base on the architecture the docker images are build for.
   }
 }
+
+/* Security group */
+resource "aws_security_group" "ecs_service" {
+  description = "Access rules for the ECS service."
+  name        = "${local.prefix}-ecs-service"
+  vpc_id      = aws_vpc.main.id
+
+  # Outbound access to endpoints
+  egress { // This allow to access the endpoints in private subnet which are in port 443
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # RDS connectivity
+  egress {
+    from_port = 3306
+    to_port   = 3306
+    protocol  = "tcp"
+    cidr_blocks = [
+      aws_subnet.private_a.cidr_block,
+      aws_subnet.private_b.cidr_block,
+    ]
+  }
+
+  # HTTP inbound access
+  ingress {
+    from_port   = 8000
+    to_port     = 8000 
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] // public access
+    security_groups = [
+      aws_security_group.lb.id // Only accesible for ecs sg
+    ]
+  }
+}
+
+/* ECS */
+resource "aws_ecs_service" "api" {
+  name                   = "${local.prefix}-api"
+  cluster                = aws_ecs_cluster.main.name
+  task_definition        = aws_ecs_task_definition.api.family
+  desired_count          = 1 // Ability to process more request and to scale up the app, as many as the app needs to handle 
+  launch_type            = "FARGATE"
+  platform_version       = "1.4.0" // Fargate version
+  enable_execute_command = true
+
+  network_configuration {
+    assign_public_ip = true
+
+    subnets = [
+      # aws_subnet.public_a.id, // private for real appp and public for testing 
+      # aws_subnet.public_b.id
+      aws_subnet.private_a.id, // resgister the servies in private subnets,, this way ecs task is protected.
+      aws_subnet.private_b.id
+    ]
+
+    security_groups = [aws_security_group.ecs_service.id]
+  }
+  // load balcner will forward requests to a target group and tg will forward to proxy container runnning on 8000
+  load_balancer {
+    target_group_arn = aws_lb_target_group.api.arn
+    container_name   = "proxy"
+    container_port   = 8000
+  }
+}
