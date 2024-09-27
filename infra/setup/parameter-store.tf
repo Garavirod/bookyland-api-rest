@@ -5,8 +5,8 @@
 // Random password
 resource "random_password" "database_user_password" {
   length           = 16
-  special          = true
-  override_special = "!@#£$%^&*()-_=+[]{}<>:?"
+  special          = false
+  // override_special = "!@#£$%^&*()-_=+[]{}<>:?"
 }
 
 // Parameter store definition
