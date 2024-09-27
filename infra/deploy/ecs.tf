@@ -63,7 +63,7 @@ resource "aws_ecs_task_definition" "api" {
   memory                   = 512
   execution_role_arn       = aws_iam_role.task_execution_role_policy.arn
   task_role_arn            = aws_iam_role.app_task.arn
-  container_definitions = jsonencode({
+  container_definitions = jsonencode([{
     name              = "api"
     image             = var.ecr_app_image
     essential         = true
@@ -100,7 +100,7 @@ resource "aws_ecs_task_definition" "api" {
         awslogs-stream-prefix = "api"
       }
     }
-  })
+  }])
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "X86_64" //important to keep in mind, because this is base on the architecture the docker images are build for.
