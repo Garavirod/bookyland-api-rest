@@ -3,6 +3,8 @@ FROM python:3.10-alpine
 # Set the container working directory 
 WORKDIR /app
 
+USER root
+
 # Copy the requirements file into the container
 COPY requirements.txt .
 

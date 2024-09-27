@@ -68,7 +68,7 @@ resource "aws_ecs_task_definition" "api" {
     image             = var.ecr_app_image
     essential         = true
     memoryReservation = 256
-    user              = "bookyland-user"
+    user              = "root"
     portMappings = [
       {
         containerPort = 8000 // hook with the ALB and SG
