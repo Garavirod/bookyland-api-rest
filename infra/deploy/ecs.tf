@@ -135,7 +135,7 @@ resource "aws_security_group" "ecs_service" {
   # HTTP inbound access
   ingress {
     from_port   = 8000
-    to_port     = 8000 
+    to_port     = 8000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] // public access
     security_groups = [
@@ -168,7 +168,7 @@ resource "aws_ecs_service" "api" {
   }
   // load balcner will forward requests to a target group and tg will forward to proxy container runnning on 8000
   load_balancer {
-    target_group_arn = aws_lb_target_group.api.arn
+    target_group_arn = aws_lb_target_group.alb_target_group.arn
     container_name   = "proxy"
     container_port   = 8000
   }
