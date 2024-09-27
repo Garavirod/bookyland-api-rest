@@ -69,6 +69,12 @@ resource "aws_ecs_task_definition" "api" {
     essential         = true
     memoryReservation = 256
     user              = "bookyland-user"
+    portMappings = [
+      {
+        containerPort = 8000 // hook with the ALB and SG
+        hostPort      = 8000
+      }
+    ]
     environment = [
       {
         name  = "DATABASE_HOST"
